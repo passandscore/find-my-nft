@@ -7,11 +7,23 @@ import { useWindowSize } from "usehooks-ts";
 export default function Home() {
   const { width, height } = useWindowSize();
   const breakpoint = 700;
+  const titleFontSize = 20;
+
+  const handleTitleFontSize = () => {
+    // grow title font size as screen width decreses below breakpoint
+    if (width < breakpoint) {
+      const diff = (breakpoint - width) / 10;
+      return `${titleFontSize + diff}px`;
+    }
+    return titleFontSize;
+  };
   return (
     <Box>
       <Box px={50} mt={20}>
         <Flex justify="space-between" align="center" h={75}>
-          <Text fz="xl">Find My NFT</Text>
+          <Text style={{ fontSize: `${handleTitleFontSize()}` }}>
+            Find My NFT
+          </Text>
           {width > breakpoint && (
             <Link
               href="https://www.covalenthq.com/"
