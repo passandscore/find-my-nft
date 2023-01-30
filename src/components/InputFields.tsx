@@ -6,15 +6,18 @@ import {
   Container,
   Flex,
   Text,
+  Switch,
 } from "@mantine/core";
 import { useState } from "react";
-import { IconAddressBook, IconLink } from "@tabler/icons-react";
+import { IconAddressBook, IconLink, Icon123 } from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications";
 import { ethers } from "ethers";
 
 export function InputsWithButton(props: TextInputProps) {
   const [chainId, setChainId] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
+  const [tokenId, setTokenId] = useState<string | null>(null);
+  const [findWithTokenId, setFindWithTokenId] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSubmit = () => {
@@ -35,17 +38,35 @@ export function InputsWithButton(props: TextInputProps) {
       });
       return;
     }
+
+    if (findWithTokenId && !tokenId) {
+      showNotification({
+        title: "Error",
+        message: "Please enter a token id",
+        color: "red",
+      });
+      return;
+    }
     setSuccessMessage("Ready to find your NFTs");
   };
 
   return (
     <>
       <Container maw={600}>
+        <Flex direction="row-reverse">
+          <Switch
+            labelPosition="left"
+            label="Find by token id"
+            color="yellow"
+            style={{ margin: "200px 0 30px 0" }}
+            onChange={() => setFindWithTokenId(!findWithTokenId)}
+          />
+        </Flex>
         <Select
           icon={<IconLink size={18} stroke={1.5} />}
+          mb={30}
           radius="xl"
           size="lg"
-          style={{ margin: "200px 0 30px 0", zIndex: 2 }}
           data={[
             { value: "1", label: "Ethereum" },
             { value: "137", label: "Polygon" },
@@ -61,19 +82,30 @@ export function InputsWithButton(props: TextInputProps) {
           icon={<IconAddressBook size={18} stroke={1.5} />}
           radius="xl"
           size="lg"
-          placeholder="contract or wallet address"
+          placeholder="Contract or wallet address"
           onChange={(e) => setAddress(e.target.value)}
           {...props}
         />
 
+        {findWithTokenId && (
+          <TextInput
+            icon={<Icon123 size={18} stroke={1.5} />}
+            mt={30}
+            radius="xl"
+            size="lg"
+            placeholder="Token id"
+            onChange={(e) => setTokenId(e.target.value)}
+            {...props}
+          />
+        )}
+
         <Flex direction="row-reverse">
           <Button
-            variant="light"
             color="yellow"
             radius="lg"
             size="lg"
             compact
-            mt={20}
+            mt={30}
             onClick={handleSubmit}
           >
             Find My NFTS
