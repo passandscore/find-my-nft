@@ -1,50 +1,54 @@
-import Image from "next/image";
-import { Box, Flex, Text } from "@mantine/core";
+import { Text } from "@mantine/core";
+import { useState } from "react";
+import { ComponentStates } from "@/data-schema";
+import { Header } from "@/components/Header";
 import { InputsWithButton } from "@/components/InputFields";
-import Link from "next/link";
+import { Gallery } from "@/components/Gallery";
+import { Profile } from "@/components/Profile";
+import { Metadata } from "@/components/Metadata";
 import { useWindowSize } from "usehooks-ts";
 
 export default function Home() {
-  const { width, height } = useWindowSize();
+  const [currentComponent, setCurrentComponent] = useState(
+    ComponentStates.INPUTS
+  );
+  const [nftData, setNftData] = useState<any>([]);
+
+  const { width } = useWindowSize();
   const breakpoint = 700;
-  const titleFontSize = 20;
 
-  const handleTitleFontSize = () => {
-    // grow title font size as screen width decreses below breakpoint
-    if (width < breakpoint) {
-      const diff = (breakpoint - width) / 10;
-      return `${titleFontSize + diff}px`;
-    }
-    return titleFontSize;
+  const changeComponent = (component: ComponentStates) => {
+    setCurrentComponent(component);
   };
-  return (
-    <Box>
-      <Box px={50} mt={20}>
-        <Flex justify="space-between" align="center" h={75}>
-          <Text style={{ fontSize: `${handleTitleFontSize()}` }}>
-            Find My NFT
-          </Text>
-          {width > breakpoint && (
-            <Link
-              href="https://www.covalenthq.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Image
-                src="/imgs/covalent-logo-no-bg.png"
-                alt="Covalent Logo"
-                width={250}
-                height={75}
-                priority
-              />
-            </Link>
-          )}
-        </Flex>
-      </Box>
 
-      <Box>
-        <InputsWithButton />
-      </Box>
-    </Box>
+  const handleNftData = (fetchedData: any) => {
+    console.log("Covalent Data", fetchedData.data);
+    setNftData(fetchedData.data);
+  };
+
+  return (
+    <>
+      <Header
+        width={width}
+        breakpoint={breakpoint}
+        currentComponent={currentComponent}
+        changeComponent={changeComponent}
+      />
+      {currentComponent === ComponentStates.INPUTS && (
+        <InputsWithButton
+          changeComponent={changeComponent}
+          handleNftData={handleNftData}
+        />
+      )}
+      {currentComponent === ComponentStates.PROFILE && (
+        <Profile nftData={nftData} />
+      )}
+      {currentComponent === ComponentStates.METADATA && (
+        <Metadata nftData={nftData} />
+      )}
+      {currentComponent === ComponentStates.GALLERY && (
+        <Gallery nftData={nftData} />
+      )}
+    </>
   );
 }
