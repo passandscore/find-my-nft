@@ -1,4 +1,3 @@
-import { Text } from "@mantine/core";
 import { useState } from "react";
 import { ComponentStates } from "@/data-schema";
 import { Header } from "@/components/Header";
@@ -22,8 +21,7 @@ export default function Home() {
   };
 
   const handleNftData = (fetchedData: any) => {
-    console.log("Covalent Data", fetchedData.data);
-    setNftData(fetchedData.data);
+    setNftData(fetchedData);
   };
 
   return (
@@ -41,7 +39,7 @@ export default function Home() {
         />
       )}
       {currentComponent === ComponentStates.PROFILE && (
-        <Profile nftData={nftData} />
+        <Profile nftData={nftData} changeComponent={changeComponent} />
       )}
       {currentComponent === ComponentStates.METADATA && (
         <Metadata nftData={nftData} />

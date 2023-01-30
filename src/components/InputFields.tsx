@@ -28,9 +28,42 @@ export function InputsWithButton({
 
   const requestByTokenId = async (providedTokenId: string) => {
     const endpoint = `https://api.covalenthq.com/v1/${chainId}/tokens/${address}/nft_metadata/${providedTokenId}/?key=${process.env.NEXT_PUBLIC_COVALENT_KEY}`;
-    const response = await fetch(endpoint);
-    const data = await response.json();
-    return data;
+
+    try {
+      const response = await fetch(endpoint);
+      const convalentData = await response.json();
+      console.log("convalentData", convalentData);
+      const hasData = Boolean(convalentData?.data?.items[0]?.nft_data);
+
+      // Check if there is an error message or no external data
+      const { error_message } = convalentData;
+
+      if (!hasData) {
+        throw new Error(
+          "No external data found. Ensure you have the correct contract address and token id."
+        );
+      }
+
+      if (error_message) {
+        throw new Error(error_message);
+      }
+
+      // Fetch the metadata from the token_url
+      const tokenData = convalentData?.data?.items[0]?.nft_data[0];
+      const metdata = await fetch(tokenData?.token_url);
+      const metadata = await metdata.json();
+
+      handleNftData({ ...tokenData, metadata });
+      changeComponent(ComponentStates.PROFILE);
+      setIsLoading(false);
+    } catch (e) {
+      showNotification({
+        title: "Error",
+        message: e.message,
+        color: "red",
+      });
+      setIsLoading(false);
+    }
   };
 
   const requestAllTokenIds = async () => {
@@ -82,33 +115,16 @@ export function InputsWithButton({
 
     setIsLoading(true);
 
-    let nftData;
     if (findWithTokenId) {
-      nftData = await requestCovalentData();
-      changeComponent(ComponentStates.PROFILE);
+      await requestCovalentData();
     } else {
-      nftData = await requestAllTokenIds();
-      changeComponent(ComponentStates.GALLERY);
+      await requestAllTokenIds();
     }
-
-    const { error_message } = nftData;
-
-    if (!error_message) {
-      handleNftData(nftData);
-    } else {
-      showNotification({
-        title: "Error",
-        message: error_message,
-        color: "red",
-      });
-    }
-
-    setIsLoading(false);
   };
 
   return (
     <Box>
-      <Container maw={600}>
+      <Container maw={600} px={50}>
         <Flex direction="row-reverse">
           <Switch
             labelPosition="left"
