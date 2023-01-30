@@ -40,7 +40,7 @@ export function InputsWithButton(props: TextInputProps) {
 
   return (
     <>
-      <Container w={600}>
+      <Container maw={600}>
         <Select
           icon={<IconLink size={18} stroke={1.5} />}
           radius="xl"
