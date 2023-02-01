@@ -19,8 +19,8 @@ export const Header = ({
       <Flex justify="space-between" align="center" h={75}>
         <Text
           fz="xl"
-          fw="bold"
           onClick={() => changeComponent(ComponentStates.INPUTS)}
+          color="yellow"
           style={{ cursor: "pointer" }}
         >
           Find My NFT

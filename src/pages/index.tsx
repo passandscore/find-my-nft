@@ -39,7 +39,11 @@ export default function Home() {
         />
       )}
       {currentComponent === ComponentStates.PROFILE && (
-        <Profile nftData={nftData} changeComponent={changeComponent} />
+        <Profile
+          nftData={nftData}
+          changeComponent={changeComponent}
+          width={width}
+        />
       )}
       {currentComponent === ComponentStates.METADATA && (
         <Metadata nftData={nftData} />

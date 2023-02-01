@@ -25,18 +25,49 @@ export function InputsWithButton({
   const [tokenId, setTokenId] = useState<string>("");
   const [findWithTokenId, setFindWithTokenId] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [networkType, setNetworkType] = useState<string>("mainnet");
+
+  const mainnetNetworkNames = [
+    { value: "1", label: "Ethereum" },
+    { value: "137", label: "Polygon" },
+    { value: "56", label: "Binance Smart Chain" },
+    { value: "80001", label: "Mumbai" },
+  ];
+
+  const testnetNetworkNames = [
+    { value: "5", label: "Goerli" },
+    { value: "4", label: "Rinkeby" },
+    { value: "42", label: "Kovan" },
+    { value: "3", label: "Ropsten" },
+    { value: "97", label: "Binance Smart Chain Testnet" },
+    { value: "80001", label: "Mumbai" },
+  ];
 
   const requestByTokenId = async (providedTokenId: string) => {
-    const endpoint = `https://api.covalenthq.com/v1/${chainId}/tokens/${address}/nft_metadata/${providedTokenId}/?key=${process.env.NEXT_PUBLIC_COVALENT_KEY}`;
-
     try {
-      const response = await fetch(endpoint);
-      const convalentData = await response.json();
-      console.log("convalentData", convalentData);
-      const hasData = Boolean(convalentData?.data?.items[0]?.nft_data);
+      const convalentData = await fetch(
+        `http://localhost:3000/api/request-by-token-id`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chainId,
+            address,
+            providedTokenId,
+          }),
+        }
+      );
+      if (!convalentData.ok) {
+        throw new Error("Error fetching data");
+      }
+      const convalentDataJson = await convalentData.json();
+      console.log("convalentDataJson", convalentDataJson);
+      const hasData = Boolean(convalentDataJson?.data?.items[0]?.nft_data);
 
       // Check if there is an error message or no external data
-      const { error_message } = convalentData;
+      const { error_message } = convalentDataJson;
 
       if (!hasData) {
         throw new Error(
@@ -49,11 +80,13 @@ export function InputsWithButton({
       }
 
       // Fetch the metadata from the token_url
-      const tokenData = convalentData?.data?.items[0]?.nft_data[0];
+      const contractData = convalentDataJson?.data?.items[0];
+      const tokenData = convalentDataJson?.data?.items[0]?.nft_data[0];
       const metdata = await fetch(tokenData?.token_url);
       const metadata = await metdata.json();
 
-      handleNftData({ ...tokenData, metadata });
+      console.log({ ...tokenData, metadata, contractData });
+      handleNftData({ ...tokenData, metadata, contractData });
       changeComponent(ComponentStates.PROFILE);
       setIsLoading(false);
     } catch (e) {
@@ -67,11 +100,38 @@ export function InputsWithButton({
   };
 
   const requestAllTokenIds = async () => {
-    const endpoint = `https://api.covalenthq.com/v1/${chainId}/tokens/${address}/nft_token_ids/?key=${process.env.NEXT_PUBLIC_COVALENT_KEY}`;
+    try {
+      const convalentData = await fetch(
+        `http://localhost:3000/api/request-by-contract`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chainId,
+            address,
+          }),
+        }
+      );
 
-    const response = await fetch(endpoint);
-    const data = await response.json();
-    return data;
+      if (!convalentData.ok) {
+        throw new Error("Error fetching data");
+      }
+      const convalentDataJson = await convalentData.json();
+      console.log(convalentDataJson);
+
+      handleNftData(convalentDataJson);
+      changeComponent(ComponentStates.GALLERY);
+      setIsLoading(false);
+    } catch (e) {
+      showNotification({
+        title: "Error",
+        message: e.message,
+        color: "red",
+      });
+      setIsLoading(false);
+    }
   };
 
   const requestCovalentData = async () => {
@@ -130,8 +190,22 @@ export function InputsWithButton({
             labelPosition="left"
             label="Find by token id"
             color="yellow"
-            style={{ margin: "200px 0 30px 0" }}
+            mt={200}
             onChange={() => setFindWithTokenId(!findWithTokenId)}
+          />
+        </Flex>
+
+        <Flex direction="row-reverse">
+          <Switch
+            labelPosition="left"
+            label="Enable Testnets"
+            color="yellow"
+            my={20}
+            onChange={() =>
+              setNetworkType(
+                `${networkType === "mainnet" ? "testnet" : "mainnet"}`
+              )
+            }
           />
         </Flex>
         <Select
@@ -139,11 +213,11 @@ export function InputsWithButton({
           mb={30}
           radius="xl"
           size="lg"
-          data={[
-            { value: "1", label: "Ethereum" },
-            { value: "137", label: "Polygon" },
-            { value: "56", label: "Binance Smart Chain" },
-          ]}
+          data={
+            networkType === "mainnet"
+              ? mainnetNetworkNames
+              : testnetNetworkNames
+          }
           placeholder="Chain id"
           clearable
           value={chainId}
@@ -154,7 +228,7 @@ export function InputsWithButton({
           icon={<IconAddressBook size={18} stroke={1.5} />}
           radius="xl"
           size="lg"
-          placeholder="Contract or wallet address"
+          placeholder="Contract address"
           onChange={(e) => setAddress(e.target.value)}
         />
 
@@ -179,7 +253,7 @@ export function InputsWithButton({
             onClick={handleSubmitValidation}
             loading={isLoading}
           >
-            Find My NFTS
+            {findWithTokenId ? "Find NFT" : "Find all NFTs"}
           </Button>
         </Flex>
       </Container>
