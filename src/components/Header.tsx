@@ -7,17 +7,27 @@ export const Header = ({
   width,
   breakpoint,
   changeComponent,
+  handleIsError,
+  handleIsLoading,
 }: {
   width: number;
   breakpoint: number;
   changeComponent: (component: ComponentStates) => void;
+  handleIsError: (error: boolean) => void;
+  handleIsLoading: (loading: boolean) => void;
 }) => {
+  const handleLogoClick = () => {
+    changeComponent(ComponentStates.INPUTS);
+    handleIsError(false);
+    handleIsLoading(false);
+  };
+
   return (
     <Box px={50} mt={20}>
       <Flex justify="space-between" align="center" h={75}>
         <Text
           fz="xl"
-          onClick={() => changeComponent(ComponentStates.INPUTS)}
+          onClick={handleLogoClick}
           color="yellow"
           style={{ cursor: "pointer" }}
         >

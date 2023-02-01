@@ -14,19 +14,27 @@ import { ethers } from "ethers";
 import { ProfileTokenData } from "@/data-schema/types";
 import { ComponentStates, NetworkEnviroments } from "@/data-schema/enums";
 import { Loading } from "@/components/Loading";
+import { FetchingError } from "@/components/FetchingError";
 
 export function InputsWithButton({
   changeComponent,
   handleNftData,
+  handleIsError,
+  isError,
+  handleIsLoading,
+  isLoading,
 }: {
   changeComponent: (component: ComponentStates) => void;
   handleNftData: (data: any) => void;
+  handleIsError: (error: boolean) => void;
+  isError: boolean;
+  handleIsLoading: (loading: boolean) => void;
+  isLoading: boolean;
 }) {
   const [chainId, setChainId] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const [tokenId, setTokenId] = useState<string>("");
   const [findWithTokenId, setFindWithTokenId] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [networkType, setNetworkType] = useState<string>(
     NetworkEnviroments.MAINNET
   );
@@ -63,12 +71,13 @@ export function InputsWithButton({
         }
       );
       if (!convalentData.ok) {
-        throw new Error("Error fetching data");
+        handleIsError(true);
+        return;
       }
       const convalentDataJson = await convalentData.json();
       const hasData = Boolean(convalentDataJson?.data?.items[0]?.nft_data);
 
-      // Check if there is an error message or no external data
+      // Check if there is an error message
       const { error_message } = convalentDataJson;
 
       if (!hasData) {
@@ -84,14 +93,31 @@ export function InputsWithButton({
       // Fetch the metadata from the token_url
       const contractData = convalentDataJson?.data?.items[0];
       const tokenData = convalentDataJson?.data?.items[0]?.nft_data[0];
-      const metdata = await fetch(tokenData?.token_url);
-      const metadata = await metdata.json();
+
+      const tokenMetadata = await fetch(
+        `http://localhost:3000/api/token-metadata`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url: tokenData?.token_url,
+          }),
+        }
+      );
+
+      const metadata = await tokenMetadata.json();
 
       const dataByTokenId = {
         metadata: {
-          image: metadata?.image,
-          image_url: metadata?.image_url,
-          token_url: tokenData?.token_url,
+          image:
+            metadata?.image ||
+            metadata?.image_url ||
+            metadata?.external_data?.image ||
+            tokenData?.ipfs_image ||
+            "",
+          token_url: tokenData?.token_url || "",
         },
         contractData: {
           contract_address: contractData?.contract_address,
@@ -111,14 +137,14 @@ export function InputsWithButton({
         ...dataByTokenId,
       });
       changeComponent(ComponentStates.PROFILE);
-      setIsLoading(false);
+      handleIsLoading(false);
     } catch (e) {
       showNotification({
         title: "Error",
         message: (e as Error).message,
         color: "red",
       });
-      setIsLoading(false);
+      handleIsLoading(false);
     }
   };
 
@@ -142,18 +168,17 @@ export function InputsWithButton({
         throw new Error("Error fetching data");
       }
       const convalentDataJson = await convalentData.json();
-      console.log(convalentDataJson);
 
       handleNftData(convalentDataJson);
       changeComponent(ComponentStates.GALLERY);
-      setIsLoading(false);
+      handleIsLoading(false);
     } catch (e) {
       showNotification({
         title: "Error",
         message: (e as Error).message,
         color: "red",
       });
-      setIsLoading(false);
+      handleIsLoading(false);
     }
   };
 
@@ -196,7 +221,7 @@ export function InputsWithButton({
       return;
     }
 
-    setIsLoading(true);
+    handleIsLoading(true);
 
     if (findWithTokenId) {
       await requestCovalentData();
@@ -204,6 +229,10 @@ export function InputsWithButton({
       await requestAllTokenIds();
     }
   };
+
+  if (isError) {
+    return <FetchingError contractAddress={address!} chainId={chainId!} />;
+  }
 
   return (
     <Box>

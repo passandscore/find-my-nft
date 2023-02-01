@@ -1,10 +1,9 @@
-import { Center, Text, Flex, Loader } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { Center, Text, Flex } from "@mantine/core";
 import styled from "@emotion/styled";
-import { loadingMessages } from "@/data/dapp";
+import { IconError404 } from "@tabler/icons-react";
 
 const OuterContainer = styled.div`
-  margin: 30px auto;
+  margin: 0 auto;
   max-width: 600px;
   min-width: 400px;
   height: 70vh;
@@ -15,7 +14,7 @@ const OuterContainer = styled.div`
 `;
 
 const InnerContainer = styled.div`
-  margin: 30px auto;
+  margin: 0 auto;
   max-width: 600px;
   min-width: 400px;
   display: grid;
@@ -25,25 +24,25 @@ const InnerContainer = styled.div`
   position: relative;
 `;
 
-export function Loading() {
-  const [randomMessage, setRandomMessage] = useState<string>("");
-
-  useEffect(() => {
-    const randomIndex = Math.floor(Math.random() * loadingMessages.length);
-    setRandomMessage(loadingMessages[randomIndex]);
-  }, []);
-
+export function ImageNotFound() {
   return (
     <>
       <OuterContainer>
         <InnerContainer>
           <Center>
-            <Text fz="lg" fw="bold" color="yellow" mb={10} align="center">
-              {randomMessage}
+            <Text
+              fz="lg"
+              fw="bold"
+              color="yellow"
+              mb={10}
+              align="center"
+              transform="uppercase"
+            >
+              No image found for this NFT
             </Text>
           </Center>
           <Flex justify="center">
-            <Loader variant="bars" color="yellow" />
+            <IconError404 size={100} color="yellow" />
           </Flex>
         </InnerContainer>
       </OuterContainer>

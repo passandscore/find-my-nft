@@ -11,6 +11,8 @@ export default function Home() {
     ComponentStates.INPUTS
   );
   const [nftData, setNftData] = useState<any>([]);
+  const [isError, setIsError] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { width } = useWindowSize();
   const breakpoint = 700;
@@ -23,18 +25,32 @@ export default function Home() {
     setNftData(fetchedData);
   };
 
+  const handleIsError = (error: boolean) => {
+    setIsError(error);
+  };
+
+  const handleIsLoading = (loading: boolean) => {
+    setIsLoading(loading);
+  };
+
   return (
     <>
       <Header
         width={width}
         breakpoint={breakpoint}
         changeComponent={changeComponent}
+        handleIsError={handleIsError}
+        handleIsLoading={handleIsLoading}
       />
 
       {currentComponent === ComponentStates.INPUTS && (
         <InputsWithButton
           changeComponent={changeComponent}
           handleNftData={handleNftData}
+          handleIsError={handleIsError}
+          isError={isError}
+          handleIsLoading={handleIsLoading}
+          isLoading={isLoading}
         />
       )}
 

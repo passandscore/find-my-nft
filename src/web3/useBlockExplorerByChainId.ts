@@ -2,11 +2,11 @@ import { useMemo } from "react";
 import { ChainIds } from "@/data-schema/enums";
 
 export function useBlockExplorerByChainId(
-  chainId: number,
+  chainId: string,
   addressHash: string
 ): string {
   const blockExplorerByChainId = useMemo(() => {
-    switch (chainId) {
+    switch (Number(chainId)) {
       case ChainIds.MAIN_NET_ID:
         return `https://etherscan.io/address/${addressHash}`;
       case ChainIds.POLYGON:

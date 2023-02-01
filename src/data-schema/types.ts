@@ -7,7 +7,6 @@ export type TokenRequest = {
 export type ProfileTokenData = {
   metadata: {
     image: string;
-    image_url: string;
   };
   contractData: {
     contract_address: string;
@@ -21,4 +20,11 @@ export type ProfileTokenData = {
   selectedChainId: string;
   selectedTokenId: string;
   selectedContractAddress: string;
+};
+
+export type ContractSelectorData = {
+  label: string;
+  value: string;
+  badge: boolean;
+  badgeUrl: string;
 };

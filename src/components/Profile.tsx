@@ -11,7 +11,9 @@ import {
 import styled from "@emotion/styled";
 import { useState } from "react";
 import { ProfileButtonOptions } from "@/data-schema/enums";
+import { ContractSelectorData } from "@/data-schema/types";
 import { useBlockExplorerByChainId } from "@/web3/useBlockExplorerByChainId";
+import { ImageNotFound } from "@/components/ImageNotFound";
 
 // CSS styling for the component
 const useStyles = createStyles((theme) => ({
@@ -70,7 +72,7 @@ export function Profile({ nftData, width }: { nftData: any; width: number }) {
   // Deconstructing the nftData object
   const { contract_address, contract_name, contract_ticker_symbol } =
     nftData.contractData;
-  const { image, image_url, token_url } = nftData.metadata;
+  const { image, token_url } = nftData.metadata;
   const { original_owner, owner } = nftData.owners;
 
   // React state
@@ -81,7 +83,7 @@ export function Profile({ nftData, width }: { nftData: any; width: number }) {
   const { classes } = useStyles();
 
   const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
-  const hasImage = image || image_url;
+  const hasImage = image;
 
   const contractData = [
     {
@@ -112,10 +114,11 @@ export function Profile({ nftData, width }: { nftData: any; width: number }) {
       badge: true,
       badgeUrl: useBlockExplorerByChainId(nftData.chainId, owner),
     },
-  ];
+  ] as ContractSelectorData[];
 
   const handleImageUrl = () => {
-    let url = image || image_url;
+    let url = image;
+
     if (url.includes("ipfs://")) {
       return url.replace("ipfs://", IPFS_GATEWAY);
     }
@@ -132,24 +135,25 @@ export function Profile({ nftData, width }: { nftData: any; width: number }) {
 
   return (
     <>
+      {/* Display NFT image */}
       <ImageContainer>
         {selectedButton === ProfileButtonOptions.NFT_IMAGE &&
           (hasImage ? (
             <Image src={handleImageUrl()} alt="Nft-Image" />
           ) : (
-            <Image src="/images/no-image.png" alt="Nft-Image" />
+            <ImageNotFound />
           ))}
 
+        {/* Display contract data */}
         {selectedButton === ProfileButtonOptions.CONTRACT && (
           <ExternalDataContainer>
             <ContractDataContainer>
               {contract_name ? (
-                // Displaying the contract data
                 contractData.map(
                   ({ label, value, badge, badgeUrl }, index) =>
                     value && (
                       <Box key={index}>
-                        <Flex>
+                        <Flex align="center">
                           <Text fz="sm" fw="bold">
                             {label}
                           </Text>
@@ -188,7 +192,7 @@ export function Profile({ nftData, width }: { nftData: any; width: number }) {
               {/* Displaying the metadata of the NFT */}
               {token_url ? (
                 <>
-                  <Flex>
+                  <Flex align="center">
                     <Text fz="md" fw="bold">
                       Metadata
                     </Text>
