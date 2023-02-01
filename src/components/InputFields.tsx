@@ -11,7 +11,8 @@ import { useState } from "react";
 import { IconAddressBook, IconLink, Icon123 } from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications";
 import { ethers } from "ethers";
-import { ComponentStates } from "@/data-schema";
+import { ProfileTokenData } from "@/data-schema/types";
+import { ComponentStates, NetworkEnviroments } from "@/data-schema/enums";
 
 export function InputsWithButton({
   changeComponent,
@@ -25,13 +26,14 @@ export function InputsWithButton({
   const [tokenId, setTokenId] = useState<string>("");
   const [findWithTokenId, setFindWithTokenId] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [networkType, setNetworkType] = useState<string>("mainnet");
+  const [networkType, setNetworkType] = useState<string>(
+    NetworkEnviroments.MAINNET
+  );
 
   const mainnetNetworkNames = [
     { value: "1", label: "Ethereum" },
     { value: "137", label: "Polygon" },
     { value: "56", label: "Binance Smart Chain" },
-    { value: "80001", label: "Mumbai" },
   ];
 
   const testnetNetworkNames = [
@@ -63,7 +65,6 @@ export function InputsWithButton({
         throw new Error("Error fetching data");
       }
       const convalentDataJson = await convalentData.json();
-      console.log("convalentDataJson", convalentDataJson);
       const hasData = Boolean(convalentDataJson?.data?.items[0]?.nft_data);
 
       // Check if there is an error message or no external data
@@ -85,14 +86,35 @@ export function InputsWithButton({
       const metdata = await fetch(tokenData?.token_url);
       const metadata = await metdata.json();
 
-      console.log({ ...tokenData, metadata, contractData });
-      handleNftData({ ...tokenData, metadata, contractData });
+      const dataByTokenId = {
+        metadata: {
+          image: metadata?.image,
+          image_url: metadata?.image_url,
+          token_url: tokenData?.token_url,
+        },
+        contractData: {
+          contract_address: contractData?.contract_address,
+          contract_name: contractData?.contract_name,
+          contract_ticker_symbol: contractData?.contract_ticker_symbol,
+        },
+        owners: {
+          original_owner: tokenData?.original_owner,
+          owner: tokenData?.owner,
+        },
+        selectedChainId: chainId,
+        selectedTokenId: providedTokenId,
+        selectedContractAddress: address,
+      } as ProfileTokenData;
+
+      handleNftData({
+        ...dataByTokenId,
+      });
       changeComponent(ComponentStates.PROFILE);
       setIsLoading(false);
     } catch (e) {
       showNotification({
         title: "Error",
-        message: e.message,
+        message: (e as Error).message,
         color: "red",
       });
       setIsLoading(false);
@@ -127,7 +149,7 @@ export function InputsWithButton({
     } catch (e) {
       showNotification({
         title: "Error",
-        message: e.message,
+        message: (e as Error).message,
         color: "red",
       });
       setIsLoading(false);
@@ -203,7 +225,11 @@ export function InputsWithButton({
             my={20}
             onChange={() =>
               setNetworkType(
-                `${networkType === "mainnet" ? "testnet" : "mainnet"}`
+                `${
+                  networkType === NetworkEnviroments.MAINNET
+                    ? NetworkEnviroments.TESTNET
+                    : NetworkEnviroments.MAINNET
+                }`
               )
             }
           />
@@ -214,7 +240,7 @@ export function InputsWithButton({
           radius="xl"
           size="lg"
           data={
-            networkType === "mainnet"
+            networkType === NetworkEnviroments.MAINNET
               ? mainnetNetworkNames
               : testnetNetworkNames
           }

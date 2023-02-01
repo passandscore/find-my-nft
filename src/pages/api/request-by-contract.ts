@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { TokenRequest } from "@/data-schema";
+import { TokenRequest } from "@/data-schema/types";
 import axios from "axios";
 
 export default async function ContractRequest(

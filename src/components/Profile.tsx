@@ -1,7 +1,6 @@
 import {
   Container,
   Image,
-  Button,
   Flex,
   SegmentedControl,
   createStyles,
@@ -9,9 +8,12 @@ import {
   Text,
   Badge,
 } from "@mantine/core";
+import styled from "@emotion/styled";
 import { useState } from "react";
-import { ComponentStates } from "@/data-schema";
+import { ProfileButtonOptions } from "@/data-schema/enums";
+import { useBlockExplorerByChainId } from "@/web3/useBlockExplorerByChainId";
 
+// CSS styling for the component
 const useStyles = createStyles((theme) => ({
   root: {
     backgroundColor:
@@ -37,19 +39,49 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export function Profile({
-  nftData,
-  changeComponent,
-  width,
-}: {
-  nftData: any;
-  changeComponent: (component: ComponentStates) => void;
-  width: number;
-}) {
-  const [selectedButton, setSelectedButton] = useState("NFT Image");
-  const { classes } = useStyles();
+const ImageContainer = styled.div`
+  margin: 30px auto;
+  max-width: 600px;
+  min-width: 400px;
+  height: 70vh;
+  padding: 20px;
+  position: relative;
+  box-shadow: rgba(0, 0, 0, 0.09) 0px 3px 12px;
+  border-radius: 35px;
+`;
+
+const ExternalDataContainer = styled.div`
+  margin: 30px auto;
+  max-width: 600px;
+  min-width: 400px;
+  display: grid;
+  align-content: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+`;
+
+const ContractDataContainer = styled.div`
+  margin-bottom: 5px;
+  margin-left: 40px;
+`;
+
+export function Profile({ nftData, width }: { nftData: any; width: number }) {
+  // Deconstructing the nftData object
   const { contract_address, contract_name, contract_ticker_symbol } =
     nftData.contractData;
+  const { image, image_url, token_url } = nftData.metadata;
+  const { original_owner, owner } = nftData.owners;
+
+  // React state
+  const [selectedButton, setSelectedButton] = useState(
+    ProfileButtonOptions.NFT_IMAGE
+  );
+
+  const { classes } = useStyles();
+
+  const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
+  const hasImage = image || image_url;
 
   const contractData = [
     {
@@ -61,6 +93,7 @@ export function Profile({
       label: "Contract Address",
       value: contract_address,
       badge: true,
+      badgeUrl: useBlockExplorerByChainId(nftData.chainId, contract_address),
     },
     {
       label: "Contract Symbol",
@@ -69,113 +102,94 @@ export function Profile({
     },
     {
       label: "Original Owner",
-      value: nftData.original_owner,
+      value: original_owner,
       badge: true,
+      badgeUrl: useBlockExplorerByChainId(nftData.chainId, original_owner),
     },
     {
       label: "Current Owner",
-      value: nftData.owner,
+      value: owner,
       badge: true,
+      badgeUrl: useBlockExplorerByChainId(nftData.chainId, owner),
     },
   ];
 
   const handleImageUrl = () => {
-    let url = nftData.metadata.image || nftData.metadata.image_url;
+    let url = image || image_url;
     if (url.includes("ipfs://")) {
-      return url.replace("ipfs://", "https://ipfs.io/ipfs/");
+      return url.replace("ipfs://", IPFS_GATEWAY);
     }
     return url || "";
   };
 
-  const handleSelection = (selection: string) => {
+  const handleSelection = (selection: ProfileButtonOptions) => {
     setSelectedButton(selection);
   };
 
   const handleMetadataViewButton = () => {
-    window.open(nftData.token_url, "_blank");
+    window.open(token_url, "_blank");
   };
 
   return (
     <>
-      <Container
-        mt={30}
-        maw={`${width > 600 && "600px"}`}
-        miw={400}
-        h="auto"
-        px={20}
-        style={{
-          position: "relative",
-          boxShadow: "rgba(0, 0, 0, 0.09) 0px 3px 12px",
-          borderRadius: 35,
-        }}
-      >
-        {handleImageUrl() ? (
-          <>
-            {selectedButton === "NFT Image" && (
-              <Image src={handleImageUrl()} alt="nft-image" />
-            )}
+      <ImageContainer>
+        {selectedButton === ProfileButtonOptions.NFT_IMAGE &&
+          (hasImage ? (
+            <Image src={handleImageUrl()} alt="Nft-Image" />
+          ) : (
+            <Image src="/images/no-image.png" alt="Nft-Image" />
+          ))}
 
-            {selectedButton === "Contract" && (
-              <Container
-                maw={`${width > 600 && "600px"}`}
-                miw={400}
-                style={{
-                  display: "grid",
-                  alignContent: "center",
-                  width: "100%",
-                  height: "100%",
-                  position: "relative",
-                }}
-              >
-                <Container mb={5}>
-                  {contractData.map(
-                    ({ label, value, badge }, index) =>
-                      value && (
-                        <Box key={index}>
-                          <Flex mb={`${index !== 4 ? "10px" : 0}`}>
-                            <Text fz="sm" fw="bold">
-                              {label}
-                            </Text>
-                            {badge && (
-                              <Badge
-                                sx={{
-                                  cursor: "pointer",
-                                  marginLeft: 10,
-                                }}
-                                size="sm"
-                                variant="gradient"
-                                gradient={{ from: "yellow", to: "orange" }}
-                              >
-                                view
-                              </Badge>
-                            )}
-                          </Flex>
-                          <Text fz={`${width > 600 ? "xl" : "lg"}`} mb={50}>
-                            {value}
+        {selectedButton === ProfileButtonOptions.CONTRACT && (
+          <ExternalDataContainer>
+            <ContractDataContainer>
+              {contract_name ? (
+                // Displaying the contract data
+                contractData.map(
+                  ({ label, value, badge, badgeUrl }, index) =>
+                    value && (
+                      <Box key={index}>
+                        <Flex>
+                          <Text fz="sm" fw="bold">
+                            {label}
                           </Text>
-                        </Box>
-                      )
-                  )}
-                </Container>
-              </Container>
-            )}
+                          {badge && (
+                            <Badge
+                              sx={{
+                                cursor: "pointer",
+                                marginLeft: 10,
+                              }}
+                              size="sm"
+                              variant="gradient"
+                              gradient={{ from: "yellow", to: "orange" }}
+                              onClick={() => window.open(badgeUrl, "_blank")}
+                            >
+                              VIEW
+                            </Badge>
+                          )}
+                        </Flex>
+                        <Text fz={`${width > 600 ? "xl" : "lg"}`} mb={50}>
+                          {value}
+                        </Text>
+                      </Box>
+                    )
+                )
+              ) : (
+                // Displaying a message if no contract data is available
+                <Text fz="xl">No contract data available</Text>
+              )}
+            </ContractDataContainer>
+          </ExternalDataContainer>
+        )}
 
-            {selectedButton === "Metadata" && (
-              <Container
-                mt={30}
-                maw={`${width > 600 && "600px"}`}
-                miw={400}
-                style={{
-                  display: "grid",
-                  alignContent: "center",
-                  width: "100%",
-                  height: "100%",
-                  position: "relative",
-                }}
-              >
-                <Container my="32%">
+        {selectedButton === ProfileButtonOptions.METADATA && (
+          <ExternalDataContainer>
+            <Container mb={100}>
+              {/* Displaying the metadata of the NFT */}
+              {token_url ? (
+                <>
                   <Flex>
-                    <Text fz="md" fw="bold" mb={10}>
+                    <Text fz="md" fw="bold">
                       Metadata
                     </Text>
                     <Badge
@@ -188,7 +202,7 @@ export function Profile({
                       gradient={{ from: "yellow", to: "orange" }}
                       onClick={handleMetadataViewButton}
                     >
-                      view
+                      VIEW
                     </Badge>
                   </Flex>
                   <Text fz="xl">
@@ -198,37 +212,27 @@ export function Profile({
                     Additionally, the metadata of an NFT can point to the link
                     you use to view the NFT, whether it’s a photo or video.
                   </Text>
-                </Container>
-              </Container>
-            )}
-          </>
-        ) : (
-          <>
-            <Image src="/imgs/Image_not_available.png" alt="nft-image" />
-            <Button
-              variant="gradient"
-              style={{
-                position: "absolute",
-                top: 0,
-                right: 0,
-                borderRadius: 0,
-              }}
-              onClick={() => changeComponent(ComponentStates.INPUTS)}
-              sx={{ cursor: "pointer" }}
-            >
-              Try again
-            </Button>
-          </>
+                </>
+              ) : (
+                // Displaying a message if no metadata is available
+                <Text fz="xl">No metadata available</Text>
+              )}
+            </Container>
+          </ExternalDataContainer>
         )}
-      </Container>
-      <Container mt={20}>
+      </ImageContainer>
+      <Container>
         <Flex justify="center">
           <SegmentedControl
             radius="xl"
             size="lg"
-            data={["NFT Image", "Contract", "Metadata"]}
+            data={[
+              ProfileButtonOptions.NFT_IMAGE,
+              ProfileButtonOptions.CONTRACT,
+              ProfileButtonOptions.METADATA,
+            ]}
             classNames={classes}
-            onChange={(value) => handleSelection(value)}
+            onChange={(value: ProfileButtonOptions) => handleSelection(value)}
           />
         </Flex>
       </Container>

@@ -1,17 +1,15 @@
 import Image from "next/image";
-import { Box, Flex, Button, Text } from "@mantine/core";
+import { Box, Flex, Text } from "@mantine/core";
 import Link from "next/link";
-import { ComponentStates } from "@/data-schema";
+import { ComponentStates } from "@/data-schema/enums";
 
 export const Header = ({
   width,
   breakpoint,
-  currentComponent,
   changeComponent,
 }: {
   width: number;
   breakpoint: number;
-  currentComponent: ComponentStates;
   changeComponent: (component: ComponentStates) => void;
 }) => {
   return (
