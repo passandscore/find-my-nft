@@ -1,83 +1,136 @@
-import { Container, Text, Pagination, Card, Image } from "@mantine/core";
-import { useState } from "react";
+import {
+  Pagination,
+  Card,
+  Image,
+  Flex,
+  Box,
+  SimpleGrid,
+  Center,
+  Badge,
+  Skeleton,
+} from "@mantine/core";
+import { useEffect, useState } from "react";
 import { prepareRequestByTokenId } from "@/BFF/RequestByTokenId";
+import { IPFS_GATEWAY } from "@/web3/constants";
 
-export function TokenCollection({ nftData }: { nftData: any }) {
-  return <Text> TokenCollection</Text>;
-  //   const [page, setPage] = useState(1);
-  //   // const classes = useStyles();
+export function TokenCollection({
+  nftData,
+  width,
+  handleIsLoading,
+}: {
+  nftData: any;
+  width: number;
+  handleIsLoading: (loading: boolean) => void;
+}) {
+  const { selectedChainId, selectedContractAddress } = nftData;
+  const { items } = nftData.data;
+
+  const [page, setPage] = useState(1);
+  const [currentPageData, setCurrentPageData] = useState([]) as any;
+  const [loadingPage, setLoadingPage] = useState(true);
 
   const tokenData = async () => {
     const data = Promise.all(
-      nftData?.data?.items.map(async (item: any) => {
-        const { tokenId } = item?.token_id;
+      items.slice(startIndex, endIndex).map(async (item: any) => {
+        const { token_id } = item;
 
         const tokenData = await prepareRequestByTokenId(
-          tokenId,
-          chainId,
-          address
+          token_id,
+          selectedChainId,
+          selectedContractAddress
         );
 
-        return tokenData;
+        const pageData = {
+          tokenId: token_id,
+          image: tokenData?.data?.metadata.image,
+        };
+
+        return pageData || {};
       })
     );
     return data;
   };
 
-  console.log("tokenData", tokenData);
+  useEffect(() => {
+    setLoadingPage(true);
+    tokenData().then((data) => {
+      handleIsLoading(false);
+      setCurrentPageData(data);
+    });
+  }, [page]);
 
-  //   const handleChange = (event, value) => {
-  //     setPage(value);
-  //   };
+  useEffect(() => {
+    setLoadingPage(false);
+  }, [currentPageData]);
 
-  //   const itemsPerPage = 5;
-  //   const startIndex = (page - 1) * itemsPerPage;
-  //   const endIndex = startIndex + itemsPerPage;
+  const itemsPerPage = width > 600 ? 12 : 9;
+  const startIndex = (page - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
 
-  //   const mappedCards = data
-  //     .slice(startIndex, endIndex)
-  //     .map((item) => (
-  //       <Card
-  //       shadow="sm"
-  //       p="xl"
-  //       component="a"
-  //       href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-  //       target="_blank"
-  //     >
-  //       <Card.Section>
-  //         <Image
-  //           src="https://images.unsplash.com/photo-1579227114347-15d08fc37cae?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2550&q=80"
-  //           height={160}
-  //           alt="No way!"
-  //         />
-  //       </Card.Section>
+  const handleImageUrl = (image: string) => {
+    let url = image;
 
-  //       {/* <Text weight={500} size="lg" mt="md">
-  //         You&apos;ve won a million dollars in cash!
-  //       </Text>
+    if (url.includes("ipfs://")) {
+      return url.replace("ipfs://", IPFS_GATEWAY);
+    }
+    return url || "";
+  };
 
-  //       <Text mt="xs" color="dimmed" size="sm">
-  //         Please click anywhere on this card to claim your reward, this is not a fraud, trust us
-  //       </Text> */}
-  //     </Card>
-  //     ));
-  //   return (
-  //     <>
-  //       <Container maw={600}>
+  const mappedCards = currentPageData.map(
+    (item: { tokenId: string; image: string }) => (
+      <Card>
+        <Card.Section>
+          <Skeleton visible={loadingPage}>
+            <Image src={handleImageUrl(item.image)} height={160} alt="NFT" />
 
-  //   return (
-  //     <div>
-  //       {mappedCards}
-  //       <Pagination
-  //         count={Math.ceil(data.length / itemsPerPage)}
-  //         page={page}
-  //         onChange={handleChange}
-  //       />
-  //     </div>
-  //   );
-  // };
-  //         {/* <Pagination page={activePage} onChange={setPage} total={10} />; */}
-  //       </Container>
-  //     </>
-  //   );
+            <Flex
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(0,0,0,0.5)",
+                backdropFilter: "blur(5px)",
+                color: "white",
+                opacity: 0,
+                transition: "opacity 0.3s ease-in-out",
+                "&:hover": {
+                  opacity: 1,
+                },
+              }}
+            >
+              <>
+                <Badge
+                  sx={{
+                    cursor: "pointer",
+                    marginLeft: 10,
+                  }}
+                  size="lg"
+                  variant="gradient"
+                  gradient={{ from: "yellow", to: "orange" }}
+                  // onClick={() => window.open(blockchainExplorer, "_blank")}
+                >
+                  {`view token ${item.tokenId}`}
+                </Badge>
+              </>
+            </Flex>
+          </Skeleton>
+        </Card.Section>
+      </Card>
+    )
+  );
+
+  return (
+    <Box m={20}>
+      <SimpleGrid cols={width > 600 ? 4 : 3} mb={50}>
+        {mappedCards}
+      </SimpleGrid>
+      <Center>
+        <Pagination page={page} onChange={setPage} total={10} size="xl" />
+      </Center>
+    </Box>
+  );
 }

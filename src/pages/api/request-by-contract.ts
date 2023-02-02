@@ -15,7 +15,13 @@ export default async function ContractRequest(
 
   try {
     const response = await axios.get(endpoint);
-    const { data } = response;
+    let { data } = response;
+
+    data = {
+      ...data,
+      selectedChainId: chainId,
+      selectedContractAddress: address,
+    };
 
     res.status(200).json(data);
   } catch (error) {

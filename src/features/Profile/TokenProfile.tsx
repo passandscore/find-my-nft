@@ -14,6 +14,7 @@ import { ProfileButtonOptions } from "@/data-schema/enums";
 import { ContractSelectorData } from "@/data-schema/types";
 import { useBlockExplorerByChainId } from "@/web3/useBlockExplorerByChainId";
 import { ImageNotFound } from "@/features/Profile/ImageNotFound";
+import { IPFS_GATEWAY } from "@/web3/constants";
 
 // CSS styling for the component
 const useStyles = createStyles((theme) => ({
@@ -88,7 +89,6 @@ export function TokenProfile({
 
   const { classes } = useStyles();
 
-  const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
   const hasImage = image;
 
   const contractData = [

@@ -99,11 +99,10 @@ export function InputsWithButton({
       const response = (await prepareRequestAllTokens(chainId!, address!)) as {
         data: ProfileTokenData;
         error: string;
-        hasData: boolean;
         networkError?: boolean;
       };
 
-      const { networkError, error, data, hasData } = response;
+      const { networkError, error, data } = response;
 
       if (networkError) {
         handleIsError(true);
@@ -117,8 +116,6 @@ export function InputsWithButton({
       });
 
       changeComponent(ComponentStates.COLLECTION);
-
-      handleIsLoading(false);
     } catch (e) {
       showNotification({
         title: "Error",

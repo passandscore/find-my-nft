@@ -59,7 +59,11 @@ export default function Home() {
       )}
 
       {currentComponent === ComponentStates.COLLECTION && (
-        <TokenCollection nftData={nftData} />
+        <TokenCollection
+          nftData={nftData}
+          width={width}
+          handleIsLoading={handleIsLoading}
+        />
       )}
     </>
   );
