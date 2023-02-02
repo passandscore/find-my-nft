@@ -13,7 +13,7 @@ import { useState } from "react";
 import { ProfileButtonOptions } from "@/data-schema/enums";
 import { ContractSelectorData } from "@/data-schema/types";
 import { useBlockExplorerByChainId } from "@/web3/useBlockExplorerByChainId";
-import { ImageNotFound } from "@/components/ImageNotFound";
+import { ImageNotFound } from "@/features/Profile/ImageNotFound";
 
 // CSS styling for the component
 const useStyles = createStyles((theme) => ({
@@ -68,7 +68,13 @@ const ContractDataContainer = styled.div`
   margin-left: 40px;
 `;
 
-export function Profile({ nftData, width }: { nftData: any; width: number }) {
+export function TokenProfile({
+  nftData,
+  width,
+}: {
+  nftData: any;
+  width: number;
+}) {
   // Deconstructing the nftData object
   const { contract_address, contract_name, contract_ticker_symbol } =
     nftData.contractData;

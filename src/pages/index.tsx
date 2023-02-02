@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { ComponentStates } from "@/data-schema/enums";
-import { Header } from "@/components/Header";
-import { InputsWithButton } from "@/components/InputFields";
-import { Gallery } from "@/components/Gallery";
-import { Profile } from "@/components/Profile";
+import { Header } from "@/features/Header/Header";
+import { InputsWithButton } from "@/features/Search/InputFields";
+import { TokenCollection } from "@/features/Collection/TokenCollection";
+import { TokenProfile } from "@/features/Profile/TokenProfile";
 import { useWindowSize } from "usehooks-ts";
 
 export default function Home() {
@@ -54,12 +54,12 @@ export default function Home() {
         />
       )}
 
-      {currentComponent === ComponentStates.PROFILE && (
-        <Profile nftData={nftData} width={width} />
+      {currentComponent === ComponentStates.TOKEN_PROFILE && (
+        <TokenProfile nftData={nftData} width={width} />
       )}
 
-      {currentComponent === ComponentStates.GALLERY && (
-        <Gallery nftData={nftData} />
+      {currentComponent === ComponentStates.COLLECTION && (
+        <TokenCollection nftData={nftData} />
       )}
     </>
   );

@@ -13,8 +13,10 @@ import { showNotification } from "@mantine/notifications";
 import { ethers } from "ethers";
 import { ProfileTokenData } from "@/data-schema/types";
 import { ComponentStates, NetworkEnviroments } from "@/data-schema/enums";
-import { Loading } from "@/components/Loading";
-import { FetchingError } from "@/components/FetchingError";
+import { Loading } from "@/features/Search/Loading";
+import { FetchingError } from "@/features/Search/FetchingError";
+import { prepareRequestByTokenId } from "@/BFF/RequestByTokenId";
+import { prepareRequestAllTokens } from "@/BFF/RequestAllTokens";
 
 export function InputsWithButton({
   changeComponent,
@@ -56,87 +58,31 @@ export function InputsWithButton({
 
   const requestByTokenId = async (providedTokenId: string) => {
     try {
-      const convalentData = await fetch(
-        `http://localhost:3000/api/request-by-token-id`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chainId,
-            address,
-            providedTokenId,
-          }),
-        }
-      );
-      if (!convalentData.ok) {
+      const response = (await prepareRequestByTokenId(
+        providedTokenId,
+        chainId!,
+        address!
+      )) as {
+        data: ProfileTokenData;
+        error: string;
+        networkError?: boolean;
+      };
+
+      const { networkError, error, data } = response;
+
+      if (networkError) {
         handleIsError(true);
         return;
       }
-      const convalentDataJson = await convalentData.json();
-      const hasData = Boolean(convalentDataJson?.data?.items[0]?.nft_data);
 
-      // Check if there is an error message
-      const { error_message } = convalentDataJson;
-
-      if (!hasData) {
-        throw new Error(
-          "No external data found. Ensure you have the correct contract address and token id."
-        );
+      if (error) {
+        throw new Error(error!);
       }
-
-      if (error_message) {
-        throw new Error(error_message);
-      }
-
-      // Fetch the metadata from the token_url
-      const contractData = convalentDataJson?.data?.items[0];
-      const tokenData = convalentDataJson?.data?.items[0]?.nft_data[0];
-
-      const tokenMetadata = await fetch(
-        `http://localhost:3000/api/token-metadata`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            url: tokenData?.token_url,
-          }),
-        }
-      );
-
-      const metadata = await tokenMetadata.json();
-
-      const dataByTokenId = {
-        metadata: {
-          image:
-            metadata?.image ||
-            metadata?.image_url ||
-            metadata?.external_data?.image ||
-            tokenData?.ipfs_image ||
-            "",
-          token_url: tokenData?.token_url || "",
-        },
-        contractData: {
-          contract_address: contractData?.contract_address,
-          contract_name: contractData?.contract_name,
-          contract_ticker_symbol: contractData?.contract_ticker_symbol,
-        },
-        owners: {
-          original_owner: tokenData?.original_owner,
-          owner: tokenData?.owner,
-        },
-        selectedChainId: chainId,
-        selectedTokenId: providedTokenId,
-        selectedContractAddress: address,
-      } as ProfileTokenData;
 
       handleNftData({
-        ...dataByTokenId,
+        ...data,
       });
-      changeComponent(ComponentStates.PROFILE);
+      changeComponent(ComponentStates.TOKEN_PROFILE);
       handleIsLoading(false);
     } catch (e) {
       showNotification({
@@ -148,29 +94,30 @@ export function InputsWithButton({
     }
   };
 
-  const requestAllTokenIds = async () => {
+  const requestAllTokens = async () => {
     try {
-      const convalentData = await fetch(
-        `http://localhost:3000/api/request-by-contract`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chainId,
-            address,
-          }),
-        }
-      );
+      const response = (await prepareRequestAllTokens(chainId!, address!)) as {
+        data: ProfileTokenData;
+        error: string;
+        hasData: boolean;
+        networkError?: boolean;
+      };
 
-      if (!convalentData.ok) {
-        throw new Error("Error fetching data");
+      const { networkError, error, data, hasData } = response;
+
+      if (networkError) {
+        handleIsError(true);
+        return;
       }
-      const convalentDataJson = await convalentData.json();
 
-      handleNftData(convalentDataJson);
-      changeComponent(ComponentStates.GALLERY);
+      if (error) throw new Error(error!);
+
+      handleNftData({
+        ...data,
+      });
+
+      changeComponent(ComponentStates.COLLECTION);
+
       handleIsLoading(false);
     } catch (e) {
       showNotification({
@@ -188,7 +135,7 @@ export function InputsWithButton({
       const tokenData = await requestByTokenId(providedTokenId);
       return tokenData;
     } else {
-      const tokenData = await requestAllTokenIds();
+      const tokenData = await requestAllTokens();
       return tokenData;
     }
   };
@@ -223,11 +170,7 @@ export function InputsWithButton({
 
     handleIsLoading(true);
 
-    if (findWithTokenId) {
-      await requestCovalentData();
-    } else {
-      await requestAllTokenIds();
-    }
+    await requestCovalentData();
   };
 
   if (isError) {

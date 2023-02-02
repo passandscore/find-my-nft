@@ -14,8 +14,8 @@ export enum ChainIds {
 
 export enum ComponentStates {
   INPUTS = "INPUTS",
-  GALLERY = "GALLERY",
-  PROFILE = "PROFILE",
+  COLLECTION = "COLLECTION",
+  TOKEN_PROFILE = "TOKEN_PROFILE",
 }
 
 export enum ProfileButtonOptions {

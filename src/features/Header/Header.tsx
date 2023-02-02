@@ -18,7 +18,7 @@ const StyledLogo = styled.div`
     width: 0;
     height: 0;
     border-bottom: 1px solid orange;
-    transition: width 0.6s ease-in-out;
+    transition: width 0.3s ease-in-out;
   }
 
   &:hover:before {
@@ -66,7 +66,7 @@ export const Header = ({
             rel="noopener noreferrer"
           >
             <Image
-              src="/imgs/covalent-logo-no-bg.png"
+              src="/imgs/header/covalent-logo-no-bg.png"
               alt="Covalent Logo"
               width={250}
               height={75}
@@ -80,7 +80,7 @@ export const Header = ({
             rel="noopener noreferrer"
           >
             <Image
-              src="/imgs/covalent-logo-crop-no-bg.png"
+              src="/imgs/header/covalent-logo-crop-no-bg.png"
               alt="Covalent Logo"
               width={75}
               height={75}
