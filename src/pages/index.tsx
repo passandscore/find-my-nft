@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { ComponentStates } from "@/data-schema/enums";
 import { Header } from "@/features/Header/Header";
+import { SocialsMenu } from "@/features/Socials/SocialsMenu";
 import { InputsWithButton } from "@/features/Search/InputFields";
 import { TokenCollection } from "@/features/Collection/TokenCollection";
 import { TokenProfile } from "@/features/Profile/TokenProfile";
 import { useWindowSize } from "usehooks-ts";
 
-export default function Home() {
+export default function FindMyNft() {
   const [currentComponent, setCurrentComponent] = useState(
     ComponentStates.INPUTS
   );
@@ -44,14 +45,17 @@ export default function Home() {
       />
 
       {currentComponent === ComponentStates.INPUTS && (
-        <InputsWithButton
-          changeComponent={changeComponent}
-          handleNftData={handleNftData}
-          handleIsError={handleIsError}
-          isError={isError}
-          handleIsLoading={handleIsLoading}
-          isLoading={isLoading}
-        />
+        <>
+          <InputsWithButton
+            changeComponent={changeComponent}
+            handleNftData={handleNftData}
+            handleIsError={handleIsError}
+            isError={isError}
+            handleIsLoading={handleIsLoading}
+            isLoading={isLoading}
+          />
+          <SocialsMenu />
+        </>
       )}
 
       {currentComponent === ComponentStates.TOKEN_PROFILE && (
