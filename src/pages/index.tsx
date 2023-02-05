@@ -53,8 +53,9 @@ export default function FindMyNft() {
             isError={isError}
             handleIsLoading={handleIsLoading}
             isLoading={isLoading}
+            nftData={nftData}
           />
-          <SocialsMenu />
+          {!isError && !isLoading && <SocialsMenu />}
         </>
       )}
 
@@ -65,8 +66,8 @@ export default function FindMyNft() {
       {currentComponent === ComponentStates.COLLECTION && (
         <TokenCollection
           nftData={nftData}
-          width={width}
           handleIsLoading={handleIsLoading}
+          handleIsError={handleIsError}
         />
       )}
     </>

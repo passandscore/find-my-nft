@@ -1,8 +1,16 @@
-import Image from "next/image";
-import { Box, Flex, Text } from "@mantine/core";
+import {
+  Box,
+  Flex,
+  HoverCard,
+  Menu,
+  Text,
+  useMantineColorScheme,
+} from "@mantine/core";
 import Link from "next/link";
 import { ComponentStates } from "@/data-schema/enums";
 import styled from "@emotion/styled";
+import { IconMenu2, IconSun, IconMoon } from "@tabler/icons-react";
+import { colaventLg, colaventSm } from "./icons";
 
 const StyledLogo = styled.div`
   position: relative;
@@ -39,6 +47,9 @@ export const Header = ({
   handleIsError: (error: boolean) => void;
   handleIsLoading: (loading: boolean) => void;
 }) => {
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const dark = colorScheme === "dark";
+
   const handleLogoClick = () => {
     changeComponent(ComponentStates.INPUTS);
     handleIsError(false);
@@ -59,35 +70,43 @@ export const Header = ({
           </Text>
         </StyledLogo>
 
-        {width > breakpoint ? (
-          <Link
-            href="https://www.covalenthq.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="/imgs/header/covalent-logo-no-bg.png"
-              alt="Covalent Logo"
-              width={250}
-              height={75}
-              priority
-            />
-          </Link>
-        ) : (
-          <Link
-            href="https://www.covalenthq.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="/imgs/header/covalent-logo-crop-no-bg.png"
-              alt="Covalent Logo"
-              width={75}
-              height={75}
-              priority
-            />
-          </Link>
-        )}
+        <Flex align="center" style={{ cursor: "pointer" }}>
+          {width > breakpoint ? (
+            <Link
+              href="https://www.covalenthq.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {dark
+                ? colaventLg(250, 75, "white")
+                : colaventLg(250, 75, "black")}
+            </Link>
+          ) : (
+            <Link
+              href="https://www.covalenthq.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {dark ? colaventSm(75, 75, "white") : colaventSm(75, 75, "black")}
+            </Link>
+          )}
+
+          <HoverCard width={200} shadow="md">
+            <HoverCard.Target>
+              <IconMenu2 size={30} color={dark ? "white" : "black"} />
+            </HoverCard.Target>
+            <HoverCard.Dropdown>
+              <Menu width={200} shadow="md">
+                <Menu.Item
+                  icon={dark ? <IconSun size={18} /> : <IconMoon size={18} />}
+                  onClick={() => toggleColorScheme()}
+                >
+                  {dark ? "Light Mode" : "Dark Mode"}
+                </Menu.Item>
+              </Menu>
+            </HoverCard.Dropdown>
+          </HoverCard>
+        </Flex>
       </Flex>
     </Box>
   );

@@ -27,14 +27,22 @@ const InnerContainer = styled.div`
 export function FetchingError({
   contractAddress,
   chainId,
+  handleIsError,
+  handleIsLoading,
+  nftData,
 }: {
   contractAddress: string;
   chainId: string;
+  handleIsError: (error: boolean) => void;
+  handleIsLoading: (loading: boolean) => void;
+  nftData: any;
 }) {
   const blockchainExplorer = useBlockExplorerByChainId(
     chainId,
     contractAddress
   );
+
+  const { contractName } = nftData;
 
   return (
     <>
@@ -49,15 +57,18 @@ export function FetchingError({
               align="center"
               transform="uppercase"
             >
-              Covalent is unable to fetch data from the blockchain
+              {`Unable to fetch ${contractName} metadata.`}
             </Text>
           </Center>
 
-          <Center>
+          <Center
+            sx={{
+              margin: 10,
+            }}
+          >
             <Badge
               sx={{
                 cursor: "pointer",
-                marginLeft: 10,
               }}
               size="lg"
               variant="gradient"
@@ -65,6 +76,25 @@ export function FetchingError({
               onClick={() => window.open(blockchainExplorer, "_blank")}
             >
               VIEW ON BLOCKCHAIN
+            </Badge>
+          </Center>
+
+          <Center>
+            <Badge
+              sx={{
+                cursor: "pointer",
+                marginTop: 10,
+                padding: "0 18px",
+              }}
+              size="lg"
+              variant="gradient"
+              gradient={{ from: "yellow", to: "orange" }}
+              onClick={() => {
+                handleIsError(false);
+                handleIsLoading(false);
+              }}
+            >
+              SEARCH BY TOKEN ID
             </Badge>
           </Center>
         </InnerContainer>

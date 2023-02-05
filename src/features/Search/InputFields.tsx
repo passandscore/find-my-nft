@@ -6,6 +6,7 @@ import {
   Flex,
   Switch,
   Box,
+  Text,
 } from "@mantine/core";
 import { useState } from "react";
 import { IconAddressBook, IconLink, Icon123 } from "@tabler/icons-react";
@@ -15,8 +16,13 @@ import { ProfileTokenData } from "@/data-schema/types";
 import { ComponentStates, NetworkEnviroments } from "@/data-schema/enums";
 import { Loading } from "@/features/Search/Loading";
 import { FetchingError } from "@/features/Search/FetchingError";
-import { prepareRequestByTokenId } from "@/BFF/RequestByTokenId";
-import { prepareRequestAllTokens } from "@/BFF/RequestAllTokens";
+import {
+  prepareRequestByTokenId,
+  prepareRequestAllTokens,
+  prepareRequestInitialTokenById,
+} from "@/BFF";
+import { mainnetNetworkNames, testnetNetworkNames } from "@/web3/constants";
+import { INITIAL_TOKEN_ID } from "@/web3/constants";
 
 export function InputsWithButton({
   changeComponent,
@@ -25,6 +31,7 @@ export function InputsWithButton({
   isError,
   handleIsLoading,
   isLoading,
+  nftData,
 }: {
   changeComponent: (component: ComponentStates) => void;
   handleNftData: (data: any) => void;
@@ -32,6 +39,7 @@ export function InputsWithButton({
   isError: boolean;
   handleIsLoading: (loading: boolean) => void;
   isLoading: boolean;
+  nftData: any;
 }) {
   const [chainId, setChainId] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
@@ -40,21 +48,6 @@ export function InputsWithButton({
   const [networkType, setNetworkType] = useState<string>(
     NetworkEnviroments.MAINNET
   );
-
-  const mainnetNetworkNames = [
-    { value: "1", label: "Ethereum" },
-    { value: "137", label: "Polygon" },
-    { value: "56", label: "Binance Smart Chain" },
-  ];
-
-  const testnetNetworkNames = [
-    { value: "5", label: "Goerli" },
-    { value: "4", label: "Rinkeby" },
-    { value: "42", label: "Kovan" },
-    { value: "3", label: "Ropsten" },
-    { value: "97", label: "Binance Smart Chain Testnet" },
-    { value: "80001", label: "Mumbai" },
-  ];
 
   const requestByTokenId = async (providedTokenId: string) => {
     try {
@@ -66,6 +59,7 @@ export function InputsWithButton({
         data: ProfileTokenData;
         error: string;
         networkError?: boolean;
+        handleIsError: (error: boolean) => void;
       };
 
       const { networkError, error, data } = response;
@@ -76,7 +70,8 @@ export function InputsWithButton({
       }
 
       if (error) {
-        throw new Error(error!);
+        // throw new Error(error!);
+        handleIsError(true);
       }
 
       handleNftData({
@@ -96,10 +91,43 @@ export function InputsWithButton({
 
   const requestAllTokens = async () => {
     try {
-      const response = (await prepareRequestAllTokens(chainId!, address!)) as {
+      //-----Check the first token id for metadata-----
+      const InitialTokenCheck = await prepareRequestInitialTokenById(
+        INITIAL_TOKEN_ID,
+        chainId!,
+        address!,
+        handleIsError
+      );
+
+      const {
+        hasInitialData,
+        contractName,
+        networkError: fetchError,
+      } = InitialTokenCheck;
+      console.log("contractName", contractName);
+
+      if (fetchError) {
+        throw new Error("An error occurred while fetching the data");
+      }
+
+      if (!hasInitialData) {
+        handleIsError(true);
+        handleNftData({ contractName });
+        return;
+      }
+      //----------------------------------------------
+
+      handleIsLoading(true);
+
+      const response = (await prepareRequestAllTokens(
+        chainId!,
+        address!,
+        handleIsError
+      )) as {
         data: ProfileTokenData;
         error: string;
         networkError?: boolean;
+        handleIsError: (error: boolean) => void;
       };
 
       const { networkError, error, data } = response;
@@ -129,11 +157,11 @@ export function InputsWithButton({
   const requestCovalentData = async () => {
     if (findWithTokenId) {
       const providedTokenId: string = tokenId;
-      const tokenData = await requestByTokenId(providedTokenId);
-      return tokenData;
+      handleIsLoading(true);
+
+      await requestByTokenId(providedTokenId);
     } else {
-      const tokenData = await requestAllTokens();
-      return tokenData;
+      await requestAllTokens();
     }
   };
 
@@ -165,13 +193,19 @@ export function InputsWithButton({
       return;
     }
 
-    handleIsLoading(true);
-
     await requestCovalentData();
   };
 
   if (isError) {
-    return <FetchingError contractAddress={address!} chainId={chainId!} />;
+    return (
+      <FetchingError
+        contractAddress={address!}
+        chainId={chainId!}
+        handleIsError={handleIsError}
+        handleIsLoading={handleIsLoading}
+        nftData={nftData}
+      />
+    );
   }
 
   return (
@@ -246,6 +280,17 @@ export function InputsWithButton({
               onChange={(e) => setTokenId(e.target.value)}
             />
           )}
+
+          {/* Add small text to the bottom left */}
+          <Text
+            color="#C0C2C5"
+            size="sm"
+            mt={5}
+            ml={10}
+            style={{ cursor: "pointer" }}
+          >
+            Need to know
+          </Text>
 
           {/* Button - Find NFT */}
           <Flex direction="row-reverse">

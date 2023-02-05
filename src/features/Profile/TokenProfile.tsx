@@ -16,7 +16,6 @@ import { useBlockExplorerByChainId } from "@/web3/useBlockExplorerByChainId";
 import { ImageNotFound } from "@/features/Profile/ImageNotFound";
 import { IPFS_GATEWAY } from "@/web3/constants";
 
-// CSS styling for the component
 const useStyles = createStyles((theme) => ({
   root: {
     backgroundColor:
@@ -76,13 +75,11 @@ export function TokenProfile({
   nftData: any;
   width: number;
 }) {
-  // Deconstructing the nftData object
   const { contract_address, contract_name, contract_ticker_symbol } =
     nftData.contractData;
   const { image, token_url } = nftData.metadata;
   const { original_owner, owner } = nftData.owners;
 
-  // React state
   const [selectedButton, setSelectedButton] = useState(
     ProfileButtonOptions.NFT_IMAGE
   );

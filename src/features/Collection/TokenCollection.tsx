@@ -1,7 +1,6 @@
 import {
   Pagination,
   Card,
-  Image,
   Flex,
   Box,
   SimpleGrid,
@@ -9,20 +8,24 @@ import {
   Badge,
   Skeleton,
   Text,
+  Transition,
 } from "@mantine/core";
-import { useEffect, useState } from "react";
-import { prepareRequestByTokenId } from "@/BFF/RequestByTokenId";
-import { IPFS_GATEWAY } from "@/web3/constants";
+import { showNotification } from "@mantine/notifications";
+import { useCallback, useEffect, useState } from "react";
+import { prepareRequestByTokenId } from "@/BFF";
 import { SelectedTokenCard } from "@/features/Collection/SelectedTokenCard";
+import { useWindowSize } from "usehooks-ts";
+import Image from "next/image";
+import { handleImageUrl } from "@/web3/useHandleImageUrl";
 
 export function TokenCollection({
   nftData,
-  width,
   handleIsLoading,
+  handleIsError,
 }: {
   nftData: any;
-  width: number;
-  handleIsLoading: (loading: boolean) => void;
+  handleIsLoading: any;
+  handleIsError: any;
 }) {
   const { selectedChainId, selectedContractAddress } = nftData;
   const { items } = nftData.data;
@@ -34,52 +37,47 @@ export function TokenCollection({
   const [loadingPage, setLoadingPage] = useState(true);
   const [openTokenCard, setOpenTokenCard] = useState(false);
   const [selectedCardTokenData, setSelectedCardTokenData] = useState({});
+  const [loadingImages, setLoadingImages] = useState(0);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
 
-  const tokenData = async () => {
-    const data = Promise.all(
-      items.slice(startIndex, endIndex).map(async (item: any) => {
-        const { token_id } = item;
+  const { width } = useWindowSize();
 
-        const tokenData = await prepareRequestByTokenId(
-          token_id,
-          selectedChainId,
-          selectedContractAddress
-        );
+  const itemsPerPage = 12;
 
-        const pageData = {
-          tokenId: token_id,
-          image: tokenData?.data?.metadata.image,
-        };
+  const tokenData = async (selectedPage: number) => {
+    try {
+      const startIndex = (selectedPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const data = Promise.all(
+        items.slice(startIndex, endIndex).map(async (item: any) => {
+          const { token_id } = item;
 
-        return pageData || {};
-      })
-    );
-    return data;
-  };
+          const tokenData = await prepareRequestByTokenId(
+            token_id,
+            selectedChainId,
+            selectedContractAddress
+          );
 
-  useEffect(() => {
-    setLoadingPage(true);
-    tokenData().then((data) => {
+          const imageUrl = handleImageUrl(tokenData?.data?.metadata?.image!);
+
+          const pageData = {
+            tokenId: token_id,
+            image: imageUrl,
+          };
+
+          return pageData || {};
+        })
+      );
+      return data;
+    } catch (e) {
+      handleIsError(true);
       handleIsLoading(false);
-      setCurrentPageData(data);
-    });
-  }, [page]);
-
-  useEffect(() => {
-    setLoadingPage(false);
-  }, [currentPageData]);
-
-  const itemsPerPage = width > 600 ? 12 : 9;
-  const startIndex = (page - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-
-  const handleImageUrl = (image: string) => {
-    let url = image;
-
-    if (url.includes("ipfs://")) {
-      return url.replace("ipfs://", IPFS_GATEWAY);
+      showNotification({
+        title: "Error",
+        message: (e as Error).message,
+        color: "red",
+      });
     }
-    return url || "";
   };
 
   const handleSelectedToken = (tokenId: string) => () => {
@@ -93,17 +91,83 @@ export function TokenCollection({
     });
   };
 
-  const mappedCards = currentPageData.map(
+  const allImagesLoaded = useCallback(() => {
+    if (loadingImages === currentPageData.length) {
+      setImagesLoaded(true);
+      setImagesLoaded(true);
+      setLoadingPage(false);
+      handleIsLoading(false);
+    }
+  }, []);
+
+  // Used for initial load
+  useEffect(() => {
+    if (width > 0) return;
+    setLoadingPage(true);
+    tokenData(1).then((data) => {
+      setCurrentPageData(data);
+    });
+  }, [width]);
+
+  // Used for page change
+  const handlePageChange = (selectedPage: number) => {
+    if (selectedPage === page) return;
+
+    const currentPage = page;
+    setPage(selectedPage);
+
+    setLoadingPage(true);
+    setLoadingImages(0);
+
+    // load new page data
+    tokenData(selectedPage).then((data) => {
+      // If no data,
+      if (data?.length === 0) {
+        showNotification({
+          title: "Error",
+          message: "No minted tokens found",
+          color: "red",
+        });
+
+        // load previous page data
+        tokenData(currentPage).then((data) => {
+          setCurrentPageData(data);
+        });
+
+        setPage(currentPage);
+        setLoadingPage(false);
+        setImagesLoaded(true);
+      } else {
+        // reload existing page data
+        setCurrentPageData(data);
+        setPage(selectedPage);
+      }
+    });
+  };
+
+  const mappedCards = currentPageData?.map(
     (item: { tokenId: string; image: string }) => (
-      <Card>
+      <Card key={item.tokenId}>
         <Card.Section>
           <Skeleton visible={loadingPage}>
             {item.image ? (
               <>
                 <Image
-                  src={handleImageUrl(item.image)}
-                  height={160}
+                  src={item.image}
                   alt="NFT"
+                  style={{
+                    width: "100%",
+                    height: "160px",
+                    objectFit: "cover",
+                  }}
+                  width={350}
+                  height={350}
+                  quality={10}
+                  blurDataURL={"https://via.placeholder.com/150"}
+                  onLoad={() => {
+                    setLoadingImages((loadedImages) => loadedImages + 1);
+                  }}
+                  onLoadingComplete={allImagesLoaded}
                 />
 
                 <Flex
@@ -120,12 +184,13 @@ export function TokenCollection({
                     color: "white",
                     opacity: 0,
                     transition: "opacity 0.3s ease-in-out",
+                    zIndex: 1,
                     "&:hover": {
                       opacity: 1,
                     },
                   }}
                 >
-                  <>
+                  <Box>
                     <Badge
                       sx={{
                         cursor: "pointer",
@@ -138,13 +203,19 @@ export function TokenCollection({
                     >
                       {`view token ${item.tokenId}`}
                     </Badge>
-                  </>
+                  </Box>
                 </Flex>
               </>
             ) : (
               <Image
                 src="https://via.placeholder.com/150"
-                height={160}
+                style={{
+                  width: "100%",
+                  height: "160px",
+                  objectFit: "cover",
+                }}
+                width={350}
+                height={350}
                 alt="NFT"
               />
             )}
@@ -166,22 +237,34 @@ export function TokenCollection({
         <SimpleGrid cols={width > 600 ? 4 : 3} mb={50}>
           {mappedCards}
         </SimpleGrid>
-        <Center>
-          <Pagination
-            page={page}
-            onChange={setPage}
-            total={collectionTotal / 10}
-            size="xl"
-          />
-        </Center>
-        <Center mt={20}>
-          <Text
-            color="orange"
-            fz="sm"
-            fw="bold"
-          >{`There are ${collectionTotal} total NFTs on the ${contractname} contract`}</Text>
-        </Center>
       </Box>
+
+      <Transition
+        mounted={imagesLoaded}
+        transition="fade"
+        duration={1000}
+        timingFunction="ease"
+      >
+        {() => (
+          <Box>
+            <Center>
+              <Pagination
+                page={page}
+                onChange={(p) => handlePageChange(p)}
+                total={collectionTotal / 10}
+                size="xl"
+              />
+            </Center>
+            <Center mt={20}>
+              <Text
+                color="orange"
+                fz="sm"
+                fw="bold"
+              >{`There are ${collectionTotal} total NFTs on the ${contractname} contract`}</Text>
+            </Center>
+          </Box>
+        )}
+      </Transition>
     </>
   );
 }
