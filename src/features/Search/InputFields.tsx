@@ -14,7 +14,7 @@ import {
   IconAddressBook,
   IconLink,
   Icon123,
-  IconInfoCircle,
+  IconQuestionMark,
 } from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications";
 import { ethers } from "ethers";
@@ -29,6 +29,24 @@ import {
 } from "@/BFF";
 import { mainnetNetworkNames, testnetNetworkNames } from "@/web3/constants";
 import { INITIAL_TOKEN_ID } from "@/web3/constants";
+import styled from "@emotion/styled";
+import { COVALENT_KEY_LOCAL_STORAGE_TITLE } from "@/web3/constants";
+
+const StyledBox = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  cursor: pointer;
+  margin-left: 12px;
+
+  &:hover #need-to-know-icon {
+    color: orange;
+  }
+
+  &:hover #need-to-know {
+    color: orange;
+  }
+`;
 
 export function InputsWithButton({
   changeComponent,
@@ -38,6 +56,7 @@ export function InputsWithButton({
   handleIsLoading,
   isLoading,
   nftData,
+  setOpenNeedToKnow,
 }: {
   changeComponent: (component: ComponentStates) => void;
   handleNftData: (data: any) => void;
@@ -46,6 +65,7 @@ export function InputsWithButton({
   handleIsLoading: (loading: boolean) => void;
   isLoading: boolean;
   nftData: any;
+  setOpenNeedToKnow: (open: boolean) => void;
 }) {
   const [chainId, setChainId] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
@@ -59,10 +79,14 @@ export function InputsWithButton({
 
   const requestByTokenId = async (providedTokenId: string) => {
     try {
+      const providedApiKey = localStorage.getItem(
+        COVALENT_KEY_LOCAL_STORAGE_TITLE
+      );
       const response = (await prepareRequestByTokenId(
         providedTokenId,
         chainId!,
-        address!
+        address!,
+        providedApiKey || ""
       )) as {
         data: ProfileTokenData;
         error: string;
@@ -78,7 +102,13 @@ export function InputsWithButton({
       }
 
       if (error) {
-        handleIsError(true);
+        handleIsLoading(false);
+        showNotification({
+          title: "Error",
+          message: error,
+          color: "red",
+        });
+        return;
       }
 
       handleNftData({
@@ -98,6 +128,8 @@ export function InputsWithButton({
 
   const requestAllTokens = async () => {
     try {
+      handleIsLoading(true);
+
       //-----Check the first token id for metadata-----
       const InitialTokenCheck = await prepareRequestInitialTokenById(
         INITIAL_TOKEN_ID,
@@ -117,18 +149,22 @@ export function InputsWithButton({
       }
 
       if (!hasInitialData) {
+        handleIsLoading(false);
         handleIsError(true);
         handleNftData({ contractName });
         return;
       }
       //----------------------------------------------
 
-      handleIsLoading(true);
+      const providedApiKey = localStorage.getItem(
+        COVALENT_KEY_LOCAL_STORAGE_TITLE
+      );
 
       const response = (await prepareRequestAllTokens(
         chainId!,
         address!,
-        handleIsError
+        handleIsError,
+        providedApiKey || ""
       )) as {
         data: ProfileTokenData;
         error: string;
@@ -260,7 +296,7 @@ export function InputsWithButton({
                 ? mainnetNetworkNames
                 : testnetNetworkNames
             }
-            placeholder="Chain id"
+            placeholder="Select a network"
             clearable
             value={chainId}
             onChange={setChainId}
@@ -288,17 +324,19 @@ export function InputsWithButton({
           )}
 
           {/* Add small text to the bottom left */}
-          <Flex align="center" mt={10} style={{ cursor: "pointer" }}>
-            <IconInfoCircle />
+          <StyledBox>
+            <IconQuestionMark size="22px" id="need-to-know-icon" />
 
             <Text
+              id="need-to-know"
               color={`${colorScheme === "dark" ? "#C0C2C5" : "black"}`}
               size="sm"
-              ml={10}
+              ml={5}
+              onClick={() => setOpenNeedToKnow(true)}
             >
               Need to know
             </Text>
-          </Flex>
+          </StyledBox>
 
           {/* Button - Find NFT */}
           <Flex direction="row-reverse">

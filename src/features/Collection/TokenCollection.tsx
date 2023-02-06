@@ -17,6 +17,7 @@ import { SelectedTokenCard } from "@/features/Collection/SelectedTokenCard";
 import { useWindowSize } from "usehooks-ts";
 import Image from "next/image";
 import { handleImageUrl } from "@/web3/useHandleImageUrl";
+import { COVALENT_KEY_LOCAL_STORAGE_TITLE } from "@/web3/constants";
 
 export function TokenCollection({
   nftData,
@@ -46,6 +47,9 @@ export function TokenCollection({
 
   const tokenData = async (selectedPage: number) => {
     try {
+      const providedApiKey = localStorage.getItem(
+        COVALENT_KEY_LOCAL_STORAGE_TITLE
+      );
       const startIndex = (selectedPage - 1) * itemsPerPage;
       const endIndex = startIndex + itemsPerPage;
       const data = Promise.all(
@@ -55,7 +59,8 @@ export function TokenCollection({
           const tokenData = await prepareRequestByTokenId(
             token_id,
             selectedChainId,
-            selectedContractAddress
+            selectedContractAddress,
+            providedApiKey || ""
           );
 
           const imageUrl = handleImageUrl(tokenData?.data?.metadata?.image!);
@@ -81,10 +86,14 @@ export function TokenCollection({
   };
 
   const handleSelectedToken = (tokenId: string) => () => {
+    const providedApiKey = localStorage.getItem(
+      COVALENT_KEY_LOCAL_STORAGE_TITLE
+    );
     prepareRequestByTokenId(
       tokenId,
       selectedChainId,
-      selectedContractAddress
+      selectedContractAddress,
+      providedApiKey || ""
     ).then((tokenData) => {
       setSelectedCardTokenData({ ...tokenData.data });
       setOpenTokenCard(true);
@@ -163,7 +172,6 @@ export function TokenCollection({
                   width={350}
                   height={350}
                   quality={10}
-                  blurDataURL={"https://via.placeholder.com/150"}
                   onLoad={() => {
                     setLoadingImages((loadedImages) => loadedImages + 1);
                   }}

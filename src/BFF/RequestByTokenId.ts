@@ -1,10 +1,10 @@
 import { ProfileTokenData } from "@/data-schema/types";
-import { handleImageUrl } from "@/web3/useHandleImageUrl";
 
 export const prepareRequestByTokenId = async (
   providedTokenId: string,
   chainId: string,
-  address: string
+  address: string,
+  providedApiKey: string
 ) => {
   try {
     const convalentData = await fetch(
@@ -18,6 +18,7 @@ export const prepareRequestByTokenId = async (
           chainId,
           address,
           providedTokenId,
+          providedApiKey,
         }),
       }
     );
@@ -27,14 +28,14 @@ export const prepareRequestByTokenId = async (
       };
     }
     const convalentDataJson = await convalentData.json();
-    const hasData = Boolean(
-      convalentDataJson?.data?.items[0]?.nft_data !== null
+    const hasContractData = Boolean(
+      convalentDataJson?.data?.items[0]?.contract_name
     );
 
     const { error_message } = convalentDataJson;
 
-    if (!hasData) {
-      throw new Error("No metadata found.");
+    if (!hasContractData) {
+      return { error: "No contract found. Check your address and network." };
     }
 
     if (error_message) {
@@ -59,7 +60,6 @@ export const prepareRequestByTokenId = async (
     );
 
     const metadata = await tokenMetadata.json();
-    const imageUrl = handleImageUrl(tokenData?.data?.metadata?.image!);
 
     const dataByTokenId = {
       metadata: {
@@ -71,7 +71,7 @@ export const prepareRequestByTokenId = async (
           tokenData?.image_url ||
           tokenData?.external_data.image ||
           "",
-        token_url: imageUrl,
+        token_url: tokenData?.token_url,
       },
       contractData: {
         contract_address: contractData?.contract_address,

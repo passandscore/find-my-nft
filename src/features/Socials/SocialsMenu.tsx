@@ -41,7 +41,11 @@ const IconContainer = styled.div`
   }
 `;
 
-export const SocialsMenu = () => {
+export const SocialsMenu = ({
+  openNeedToKnow,
+}: {
+  openNeedToKnow: boolean;
+}) => {
   const [hovered, setHovered] = useState(false);
   const [isRow, setIsRow] = useState(false);
   const { width, height } = useWindowSize();
@@ -104,6 +108,8 @@ export const SocialsMenu = () => {
       opacity: 0;
     }
   `;
+
+  if (openNeedToKnow) return <></>;
 
   return (
     <StyledContainer

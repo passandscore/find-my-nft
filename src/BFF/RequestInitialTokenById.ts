@@ -25,7 +25,6 @@ export const prepareRequestInitialTokenById = async (
     }
 
     const convalentDataJson = await convalentData.json();
-    console.log("initalTokenData", convalentDataJson);
     const { contract_name } = convalentDataJson?.data?.items[0];
     const hasData = Boolean(
       convalentDataJson?.data?.items[0]?.nft_data !== null

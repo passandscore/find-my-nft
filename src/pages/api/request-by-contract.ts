@@ -6,12 +6,15 @@ export default async function ContractRequest(
   req: NextApiRequest,
   res: NextApiResponse<TokenRequest | string>
 ) {
-  const { chainId, address } = req.body as {
+  const { chainId, address, providedApiKey } = req.body as {
     chainId: number;
     address: string;
+    providedApiKey: string;
   };
 
-  const endpoint = `https://api.covalenthq.com/v1/${chainId}/tokens/${address}/nft_token_ids/?key=${process.env.COVALENT_KEY}`;
+  const API_KEY = providedApiKey || process.env.COVALENT_KEY;
+
+  const endpoint = `https://api.covalenthq.com/v1/${chainId}/tokens/${address}/nft_token_ids/?key=${API_KEY}`;
 
   try {
     const response = await axios.get(endpoint);

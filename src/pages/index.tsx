@@ -6,6 +6,8 @@ import { InputsWithButton } from "@/features/Search/InputFields";
 import { TokenCollection } from "@/features/Collection/TokenCollection";
 import { TokenProfile } from "@/features/Profile/TokenProfile";
 import { useWindowSize } from "usehooks-ts";
+import { Modal } from "@mantine/core";
+import { NeedToKnowAccordian } from "@/features/Search/NeedToKnowAccordian";
 
 export default function FindMyNft() {
   const [currentComponent, setCurrentComponent] = useState(
@@ -14,6 +16,7 @@ export default function FindMyNft() {
   const [nftData, setNftData] = useState<any>([]);
   const [isError, setIsError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [openNeedToKnow, setOpenNeedToKnow] = useState<boolean>(false);
 
   const { width } = useWindowSize();
 
@@ -55,8 +58,11 @@ export default function FindMyNft() {
             handleIsLoading={handleIsLoading}
             isLoading={isLoading}
             nftData={nftData}
+            setOpenNeedToKnow={setOpenNeedToKnow}
           />
-          {!isError && !isLoading && <SocialsMenu />}
+          {!isError && !isLoading && (
+            <SocialsMenu openNeedToKnow={openNeedToKnow} />
+          )}
         </>
       )}
 
@@ -71,6 +77,16 @@ export default function FindMyNft() {
           handleIsError={handleIsError}
         />
       )}
+
+      <Modal
+        opened={openNeedToKnow}
+        onClose={() => setOpenNeedToKnow(false)}
+        title="Need to know"
+        centered
+        size="xl"
+      >
+        <NeedToKnowAccordian />
+      </Modal>
     </>
   );
 }

@@ -1,21 +1,20 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { TokenRequest } from "@/data-schema/types";
 import axios from "axios";
+import { COVALENT_KEY_LOCAL_STORAGE_TITLE } from "@/web3/constants";
 
-export default async function TokenRequestById(
+export default async function TokenRequestTestById(
   req: NextApiRequest,
   res: NextApiResponse<TokenRequest | string>
 ) {
-  const { chainId, address, providedTokenId, providedApiKey } = req.body as {
+  const { chainId, address, providedTokenId, testApiKey } = req.body as {
     chainId: number;
     address: string;
     providedTokenId: string;
-    providedApiKey: string;
+    testApiKey: string;
   };
 
-  const API_KEY = providedApiKey || process.env.COVALENT_KEY;
-
-  const endpoint = `https://api.covalenthq.com/v1/${chainId}/tokens/${address}/nft_metadata/${providedTokenId}/?key=${API_KEY}`;
+  const endpoint = `https://api.covalenthq.com/v1/${chainId}/tokens/${address}/nft_metadata/${providedTokenId}/?key=${testApiKey}`;
 
   try {
     const response = await axios.get(endpoint);

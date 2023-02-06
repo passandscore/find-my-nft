@@ -1,10 +1,18 @@
 export const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
-export const INITIAL_TOKEN_ID = "0";
+export const INITIAL_TOKEN_ID = "1";
+export const API_KEY_VALIDATION = {
+  contractAddress: "0x60E4d786628Fea6478F785A6d7e704777c86a7c6",
+  tokenId: "1",
+  chainId: "1",
+};
+export const COVALENT_KEY_LOCAL_STORAGE_TITLE = "covalentApiKey";
 export const SOCIAL_MEDIA = {
   twitter: "https://twitter.com/passandscore",
   linkedin: "https://www.linkedin.com/in/jason-schwarz-75b91482/",
   github: " https://github.com/passandscore",
 };
+export const COVALENT_API_SIGNUP =
+  "https://www.covalenthq.com/platform/#/auth/register/";
 export const mainnetNetworkNames = [
   { value: "1", label: "Ethereum" },
   { value: "137", label: "Polygon" },

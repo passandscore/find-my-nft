@@ -1,7 +1,8 @@
 export const prepareRequestAllTokens = async (
   chainId: string,
   address: string,
-  handleIsError: (error: boolean) => void
+  handleIsError: (error: boolean) => void,
+  providedApiKey: string
 ) => {
   try {
     // used to control the fetch request and abort it if it takes too long
@@ -20,6 +21,7 @@ export const prepareRequestAllTokens = async (
         body: JSON.stringify({
           chainId,
           address,
+          providedApiKey,
         }),
         signal,
       }
