@@ -16,6 +16,7 @@ export default function FindMyNft() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { width } = useWindowSize();
+
   const breakpoint = 700;
 
   const changeComponent = (component: ComponentStates) => {

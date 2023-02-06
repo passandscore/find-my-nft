@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useWindowSize } from "usehooks-ts";
 import { Center, Image } from "@mantine/core";
 import styled from "@emotion/styled";
@@ -47,6 +47,8 @@ export const SocialsMenu = () => {
   const { width, height } = useWindowSize();
   const avatarImage = "imgs/avatar.jpeg";
 
+  const avatarRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (width < 1000) {
       if (isRow) return;
@@ -67,7 +69,6 @@ export const SocialsMenu = () => {
 
     &:hover #avatar {
       border: 1px solid white;
-
       animation: ${isRow ? spinLeft : spinRight} 1s ease-in-out;
     }
 
@@ -110,7 +111,14 @@ export const SocialsMenu = () => {
         display: hideSocialsByScreenWidth ? "none" : "flex",
         flexDirection: isRow ? "row" : "column",
       }}
-      onMouseLeave={() => setHovered(false)}
+      onMouseLeave={() => {
+        if (avatarRef?.current) {
+          avatarRef.current.style.animationPlayState = "paused";
+        }
+        setTimeout(() => {
+          setHovered(false);
+        }, 1000);
+      }}
     >
       {hovered && (
         <>
@@ -146,6 +154,7 @@ export const SocialsMenu = () => {
       {/* Avatar */}
       <Center
         id="avatar"
+        ref={avatarRef}
         style={{
           borderRadius: "50%",
           overflow: "hidden",

@@ -1,6 +1,7 @@
 import { AppProps } from "next/app";
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocalStorage } from "usehooks-ts";
 import {
   MantineProvider,
   ColorSchemeProvider,
@@ -14,6 +15,13 @@ export default function App(props: AppProps) {
   const [colorScheme, setColorScheme] = useState<ColorScheme>("light");
   const toggleColorScheme = (value?: ColorScheme) =>
     setColorScheme(value || (colorScheme === "dark" ? "light" : "dark"));
+
+  useEffect(() => {
+    const storedTheme = localStorage.getItem("colorScheme");
+    if (storedTheme) {
+      setColorScheme(storedTheme as ColorScheme);
+    }
+  }, []);
 
   return (
     <>

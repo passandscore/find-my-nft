@@ -1,15 +1,14 @@
 import {
+  ActionIcon,
   Box,
   Flex,
-  HoverCard,
-  Menu,
   Text,
   useMantineColorScheme,
 } from "@mantine/core";
 import Link from "next/link";
 import { ComponentStates } from "@/data-schema/enums";
 import styled from "@emotion/styled";
-import { IconMenu2, IconSun, IconMoon } from "@tabler/icons-react";
+import { IconSun, IconMoon } from "@tabler/icons-react";
 import { colaventLg, colaventSm } from "./icons";
 
 const StyledLogo = styled.div`
@@ -49,6 +48,15 @@ export const Header = ({
 }) => {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const dark = colorScheme === "dark";
+
+  const handleColorScheme = () => {
+    if (colorScheme === "dark") {
+      localStorage.setItem("colorScheme", "light");
+    } else {
+      localStorage.setItem("colorScheme", "dark");
+    }
+    toggleColorScheme();
+  };
 
   const handleLogoClick = () => {
     changeComponent(ComponentStates.INPUTS);
@@ -90,22 +98,15 @@ export const Header = ({
               {dark ? colaventSm(75, 75, "white") : colaventSm(75, 75, "black")}
             </Link>
           )}
-
-          <HoverCard width={200} shadow="md">
-            <HoverCard.Target>
-              <IconMenu2 size={30} color={dark ? "white" : "black"} />
-            </HoverCard.Target>
-            <HoverCard.Dropdown>
-              <Menu width={200} shadow="md">
-                <Menu.Item
-                  icon={dark ? <IconSun size={18} /> : <IconMoon size={18} />}
-                  onClick={() => toggleColorScheme()}
-                >
-                  {dark ? "Light Mode" : "Dark Mode"}
-                </Menu.Item>
-              </Menu>
-            </HoverCard.Dropdown>
-          </HoverCard>
+          {dark ? (
+            <ActionIcon variant="subtle" onClick={() => handleColorScheme()}>
+              <IconSun size={30} />
+            </ActionIcon>
+          ) : (
+            <ActionIcon variant="subtle" onClick={() => handleColorScheme()}>
+              <IconMoon size={30} />
+            </ActionIcon>
+          )}
         </Flex>
       </Flex>
     </Box>

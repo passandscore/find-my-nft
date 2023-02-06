@@ -7,9 +7,15 @@ import {
   Switch,
   Box,
   Text,
+  useMantineColorScheme,
 } from "@mantine/core";
 import { useState } from "react";
-import { IconAddressBook, IconLink, Icon123 } from "@tabler/icons-react";
+import {
+  IconAddressBook,
+  IconLink,
+  Icon123,
+  IconInfoCircle,
+} from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications";
 import { ethers } from "ethers";
 import { ProfileTokenData } from "@/data-schema/types";
@@ -49,6 +55,8 @@ export function InputsWithButton({
     NetworkEnviroments.MAINNET
   );
 
+  const { colorScheme } = useMantineColorScheme();
+
   const requestByTokenId = async (providedTokenId: string) => {
     try {
       const response = (await prepareRequestByTokenId(
@@ -70,7 +78,6 @@ export function InputsWithButton({
       }
 
       if (error) {
-        // throw new Error(error!);
         handleIsError(true);
       }
 
@@ -104,7 +111,6 @@ export function InputsWithButton({
         contractName,
         networkError: fetchError,
       } = InitialTokenCheck;
-      console.log("contractName", contractName);
 
       if (fetchError) {
         throw new Error("An error occurred while fetching the data");
@@ -282,15 +288,17 @@ export function InputsWithButton({
           )}
 
           {/* Add small text to the bottom left */}
-          <Text
-            color="#C0C2C5"
-            size="sm"
-            mt={5}
-            ml={10}
-            style={{ cursor: "pointer" }}
-          >
-            Need to know
-          </Text>
+          <Flex align="center" mt={10} style={{ cursor: "pointer" }}>
+            <IconInfoCircle />
+
+            <Text
+              color={`${colorScheme === "dark" ? "#C0C2C5" : "black"}`}
+              size="sm"
+              ml={10}
+            >
+              Need to know
+            </Text>
+          </Flex>
 
           {/* Button - Find NFT */}
           <Flex direction="row-reverse">
