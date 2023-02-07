@@ -276,8 +276,9 @@ export function TokenCollection({
               <Pagination
                 page={page}
                 onChange={(p) => handlePageChange(p)}
-                total={collectionTotal / itemsPerPage}
+                total={collectionTotal}
                 size="xl"
+                boundaries={2}
               />
             </Center>
             <Center mt={20}>

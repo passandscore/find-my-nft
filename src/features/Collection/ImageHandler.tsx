@@ -23,7 +23,8 @@ export const ImageHandler = ({
       style={{
         width: handleDimensions(),
         height: handleDimensions(),
-        objectFit: "contain",
+        // objectFit: "contain",
+        objectFit: "scale-down",
       }}
       width={100}
       height={350}

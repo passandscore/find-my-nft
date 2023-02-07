@@ -265,6 +265,7 @@ export function InputsWithButton({
               label="Find by token id"
               color="yellow"
               mt={200}
+              defaultChecked={findWithTokenId}
               onChange={() => setFindWithTokenId(!findWithTokenId)}
             />
           </Flex>
@@ -276,6 +277,9 @@ export function InputsWithButton({
               label="Enable Testnets"
               color="yellow"
               my={20}
+              defaultChecked={
+                networkType === NetworkEnviroments.MAINNET ? false : true
+              }
               onChange={() =>
                 setNetworkType(
                   `${

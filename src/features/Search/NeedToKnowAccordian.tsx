@@ -136,6 +136,15 @@ export const NeedToKnowAccordian = () => {
             This occurs when the metadata URL is either invalid or not found.
             You can verify this on the block explorer.
           </Text>
+          <Text size="sm" color="orange" mb={5} mt={10}>
+            NO MINTED TOKENS FOUND
+          </Text>
+          <Text>
+            This occurs when the collection page you are accessing has not
+            actually minted the tokens. The collection only has access to the
+            total supply of tokens, not the actual tokens that have been minted.
+            You can verify this on the block explorer.
+          </Text>
         </Accordion.Panel>
       </Accordion.Item>
 
