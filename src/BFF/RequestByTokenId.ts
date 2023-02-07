@@ -1,4 +1,5 @@
 import { ProfileTokenData } from "@/data-schema/types";
+import { handleImageUrl } from "@/web3/useHandleImageUrl";
 
 export const prepareRequestByTokenId = async (
   providedTokenId: string,
@@ -46,32 +47,10 @@ export const prepareRequestByTokenId = async (
     const contractData = convalentDataJson?.data?.items[0];
     const tokenData = convalentDataJson?.data?.items[0]?.nft_data[0];
 
-    const tokenMetadata = await fetch(
-      `http://localhost:3000/api/token-metadata`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url: tokenData?.token_url,
-        }),
-      }
-    );
-
-    const metadata = await tokenMetadata.json();
-
     const dataByTokenId = {
       metadata: {
-        image:
-          metadata?.image ||
-          metadata?.image_url ||
-          metadata?.external_data?.image ||
-          tokenData?.ipfs_image ||
-          tokenData?.image_url ||
-          tokenData?.external_data.image ||
-          "",
-        token_url: tokenData?.token_url,
+        image: tokenData?.external_data.image || "",
+        token_url: handleImageUrl(tokenData?.token_url),
       },
       contractData: {
         contract_address: contractData?.contract_address,

@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { useWindowSize } from "usehooks-ts";
-import { Center, Image } from "@mantine/core";
+import { Center, Image, useMantineColorScheme } from "@mantine/core";
 import styled from "@emotion/styled";
-import { SOCIAL_MEDIA } from "@/web3/constants";
+import { SOCIAL_MEDIA, AVATAR_IMAGE } from "@/web3/constants";
 import {
   GithubIcon,
   TwitterIcon,
   LinkedInIcon,
+  DiscordIcon,
 } from "@/features/Socials/icons";
 import {
   spinLeft,
@@ -25,22 +26,6 @@ const SocialContainer = styled.div`
   cursor: pointer;
 `;
 
-const IconContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #ef8c01;
-  width: 60px;
-  height: 60px;
-  cursor: pointer;
-  border-radius: 50%;
-  &:hover {
-    opacity: 0.8;
-    animation: ${pulse} 1.3s ease-in-out;
-    background-color: transparent;
-  }
-`;
-
 export const SocialsMenu = ({
   openNeedToKnow,
 }: {
@@ -48,8 +33,9 @@ export const SocialsMenu = ({
 }) => {
   const [hovered, setHovered] = useState(false);
   const [isRow, setIsRow] = useState(false);
+
   const { width, height } = useWindowSize();
-  const avatarImage = "imgs/avatar.jpeg";
+  const { colorScheme } = useMantineColorScheme();
 
   const avatarRef = useRef<HTMLDivElement>(null);
 
@@ -64,6 +50,26 @@ export const SocialsMenu = ({
 
   const hideSocialsByScreenWidth = height < 700;
 
+  const IconContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ef8c01;
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    border-radius: 50%;
+    &:hover {
+      opacity: 0.8;
+      animation: ${pulse} 1.3s ease-in-out;
+      background-color: transparent;
+    }
+
+    &:hover svg {
+      stroke: ${colorScheme === "dark" ? "white" : "black"};
+    }
+  `;
+
   const StyledContainer = styled.div`
     grid-gap: 30px;
     position: absolute;
@@ -77,7 +83,7 @@ export const SocialsMenu = ({
     }
 
     &:not(:hover) #avatar {
-      border: 1px solid white;
+      border: 1px solid ${colorScheme === "dark" ? "white" : "black"};
       animation: ${isRow ? spinRight : spinLeft} 1s ease-in-out;
     }
 
@@ -93,17 +99,26 @@ export const SocialsMenu = ({
       animation: ${isRow ? fadeLeft : fadeIn} 1.3s ease-in-out;
     }
 
+    &:hover #discord {
+      animation: ${isRow ? fadeLeft : fadeIn} 1.6s ease-in-out;
+    }
+
     &:not(:hover) #twitter {
-      animation: ${isRow ? fadeRight : fadeOut} 1.3s ease-in-out;
+      animation: ${isRow ? fadeRight : fadeOut} 1.6s ease-in-out;
       opacity: 0;
     }
 
     &:not(:hover) #linkedin {
-      animation: ${isRow ? fadeRight : fadeOut} 1s ease-in-out;
+      animation: ${isRow ? fadeRight : fadeOut} 1.3s ease-in-out;
       opacity: 0;
     }
 
     &:not(:hover) #github {
+      animation: ${isRow ? fadeRight : fadeOut} 0.9s ease-in-out;
+      opacity: 0;
+    }
+
+    &:not(:hover) #discord {
       animation: ${isRow ? fadeRight : fadeOut} 0.6s ease-in-out;
       opacity: 0;
     }
@@ -128,6 +143,15 @@ export const SocialsMenu = ({
     >
       {hovered && (
         <>
+          {/* Discord */}
+          <SocialContainer id="discord">
+            <IconContainer
+              onClick={() => window.open(SOCIAL_MEDIA.discord, "_blank")}
+            >
+              {DiscordIcon(40, 40, "white", 1)}
+            </IconContainer>
+          </SocialContainer>
+
           {/* Github */}
           <SocialContainer id="github">
             <IconContainer
@@ -168,7 +192,7 @@ export const SocialsMenu = ({
         onMouseOver={() => setHovered(true)}
       >
         <Image
-          src={avatarImage}
+          src={AVATAR_IMAGE}
           alt="it's me"
           fit="contain"
           style={{

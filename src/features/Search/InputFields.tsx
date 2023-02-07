@@ -27,10 +27,13 @@ import {
   prepareRequestAllTokens,
   prepareRequestInitialTokenById,
 } from "@/BFF";
-import { mainnetNetworkNames, testnetNetworkNames } from "@/web3/constants";
-import { INITIAL_TOKEN_ID } from "@/web3/constants";
 import styled from "@emotion/styled";
-import { COVALENT_KEY_LOCAL_STORAGE_TITLE } from "@/web3/constants";
+import {
+  COVALENT_KEY_LOCAL_STORAGE_TITLE,
+  mainnetNetworkNames,
+  testnetNetworkNames,
+  INITIAL_TOKEN_ID,
+} from "@/web3/constants";
 
 const StyledBox = styled.div`
   display: flex;

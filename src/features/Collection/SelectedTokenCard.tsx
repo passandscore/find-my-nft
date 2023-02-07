@@ -1,5 +1,13 @@
 import { Modal } from "@mantine/core";
 import { TokenProfile } from "@/features/Profile/TokenProfile";
+import styled from "@emotion/styled";
+
+const StyledModal = styled(Modal)`
+  .mantine-Modal-title {
+    font-size: 20px;
+    color: orange;
+  }
+`;
 
 export const SelectedTokenCard = ({
   openTokenCard,
@@ -13,19 +21,23 @@ export const SelectedTokenCard = ({
   width: number;
 }) => {
   const { selectedTokenId } = selectedCardTokenData;
-  const { contract_name } = selectedCardTokenData?.contractData || "";
   return (
     <>
-      <Modal
+      <StyledModal
         opened={openTokenCard}
         onClose={() => setOpenTokenCard(false)}
-        title={`${contract_name}: Token ${selectedTokenId}`}
+        title={`Token ${selectedTokenId}`}
         size="lg"
         overlayBlur={10}
         overlayOpacity={0.5}
+        centered
       >
-        <TokenProfile nftData={selectedCardTokenData} width={width} />
-      </Modal>
+        <TokenProfile
+          nftData={selectedCardTokenData}
+          width={width}
+          selectedTokenId={selectedTokenId}
+        />
+      </StyledModal>
     </>
   );
 };

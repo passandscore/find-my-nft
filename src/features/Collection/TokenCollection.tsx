@@ -18,6 +18,7 @@ import { useWindowSize } from "usehooks-ts";
 import Image from "next/image";
 import { handleImageUrl } from "@/web3/useHandleImageUrl";
 import { COVALENT_KEY_LOCAL_STORAGE_TITLE } from "@/web3/constants";
+import { ImageHandler } from "@/features/Collection/ImageHandler";
 
 export function TokenCollection({
   nftData,
@@ -38,12 +39,11 @@ export function TokenCollection({
   const [loadingPage, setLoadingPage] = useState(true);
   const [openTokenCard, setOpenTokenCard] = useState(false);
   const [selectedCardTokenData, setSelectedCardTokenData] = useState({});
-  const [loadingImages, setLoadingImages] = useState(0);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [showPagination, setShowPagination] = useState(false);
 
   const { width } = useWindowSize();
 
-  const itemsPerPage = 12;
+  const itemsPerPage = 8;
 
   const tokenData = async (selectedPage: number) => {
     try {
@@ -100,10 +100,8 @@ export function TokenCollection({
     });
   };
 
-  const allImagesLoaded = useCallback(() => {
-    if (loadingImages === currentPageData.length) {
-      setImagesLoaded(true);
-      setImagesLoaded(true);
+  const allImagesLoaded = useCallback((currentImage: number) => {
+    if (currentImage === itemsPerPage) {
       setLoadingPage(false);
       handleIsLoading(false);
     }
@@ -115,6 +113,7 @@ export function TokenCollection({
     setLoadingPage(true);
     tokenData(1).then((data) => {
       setCurrentPageData(data);
+      setShowPagination(true);
     });
   }, [width]);
 
@@ -126,7 +125,6 @@ export function TokenCollection({
     setPage(selectedPage);
 
     setLoadingPage(true);
-    setLoadingImages(0);
 
     // load new page data
     tokenData(selectedPage).then((data) => {
@@ -145,7 +143,6 @@ export function TokenCollection({
 
         setPage(currentPage);
         setLoadingPage(false);
-        setImagesLoaded(true);
       } else {
         // reload existing page data
         setCurrentPageData(data);
@@ -154,28 +151,48 @@ export function TokenCollection({
     });
   };
 
+  const handleGridColumns = () => {
+    if (width > 0 && width < 768) {
+      return 1;
+    } else if (width > 768 && width < 1024) {
+      return 2;
+    } else {
+      return 4;
+    }
+  };
+
+  const handleDimensions = () => {
+    if (width > 0 && width < 768) {
+      return "475px";
+    } else if (width > 768 && width < 1024) {
+      return "375px";
+    } else {
+      return "275px";
+    }
+  };
+
   const mappedCards = currentPageData?.map(
-    (item: { tokenId: string; image: string }) => (
-      <Card key={item.tokenId}>
+    (item: { tokenId: string; image: string }, index: number) => (
+      <Card
+        key={item.tokenId}
+        style={{
+          backgroundColor: "transparent",
+          width: "100%",
+          height: handleDimensions(),
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <Card.Section>
           <Skeleton visible={loadingPage}>
             {item.image ? (
               <>
-                <Image
+                <ImageHandler
                   src={item.image}
-                  alt="NFT"
-                  style={{
-                    width: "100%",
-                    height: "160px",
-                    objectFit: "cover",
-                  }}
-                  width={350}
-                  height={350}
-                  quality={10}
-                  onLoad={() => {
-                    setLoadingImages((loadedImages) => loadedImages + 1);
-                  }}
-                  onLoadingComplete={allImagesLoaded}
+                  allImagesLoaded={allImagesLoaded}
+                  index={index}
+                  handleDimensions={handleDimensions}
                 />
 
                 <Flex
@@ -216,14 +233,14 @@ export function TokenCollection({
               </>
             ) : (
               <Image
-                src="https://via.placeholder.com/150"
+                src="/imgs/placeholder.png"
                 style={{
-                  width: "100%",
-                  height: "160px",
+                  width: "275px",
+                  height: "275px",
                   objectFit: "cover",
                 }}
-                width={350}
-                height={350}
+                width={200}
+                height={200}
                 alt="NFT"
               />
             )}
@@ -242,24 +259,24 @@ export function TokenCollection({
         width={width}
       />
       <Box m={20}>
-        <SimpleGrid cols={width > 600 ? 4 : 3} mb={50}>
+        <SimpleGrid cols={handleGridColumns()} mb={50}>
           {mappedCards}
         </SimpleGrid>
       </Box>
 
       <Transition
-        mounted={imagesLoaded}
+        mounted={showPagination}
         transition="fade"
         duration={1000}
         timingFunction="ease"
       >
         {() => (
-          <Box>
+          <Box mb={20}>
             <Center>
               <Pagination
                 page={page}
                 onChange={(p) => handlePageChange(p)}
-                total={collectionTotal / 10}
+                total={collectionTotal / itemsPerPage}
                 size="xl"
               />
             </Center>

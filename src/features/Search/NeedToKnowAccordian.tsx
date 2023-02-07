@@ -1,5 +1,9 @@
 import { Accordion, Button, Flex, Input, Text } from "@mantine/core";
-import { COVALENT_API_SIGNUP } from "@/web3/constants";
+import {
+  COVALENT_API_SIGNUP,
+  SOCIAL_MEDIA,
+  GITHUB_PROJECT_URL,
+} from "@/web3/constants";
 import { IconKey } from "@tabler/icons-react";
 import { useEffect, useState, useRef } from "react";
 import { showNotification } from "@mantine/notifications";
@@ -12,7 +16,6 @@ import { RequestTestTokenId } from "@/BFF";
 export const NeedToKnowAccordian = () => {
   const [storedApiKey, setStoredApiKey] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  // const [validApiKey, setValidApiKey] = useState<boolean>(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -118,8 +121,21 @@ export const NeedToKnowAccordian = () => {
       <Accordion.Item value="flexibility">
         <Accordion.Control>Errors</Accordion.Control>
         <Accordion.Panel>
-          Configure components appearance and behavior with vast amount of
-          settings or overwrite any part of component styles
+          <Text size="sm" color="orange" mb={5}>
+            NFT NOT FOUND
+          </Text>
+          <Text>
+            This can either mean that the NFT does not exist or that application
+            failed to render it correctly. Try toggling the page buttons below
+            the collection as a workaround.
+          </Text>
+          <Text size="sm" color="orange" mb={5} mt={10}>
+            METADATA NOT FOUND
+          </Text>
+          <Text>
+            This occurs when the metadata URL is either invalid or not found.
+            You can verify this on the block explorer.
+          </Text>
         </Accordion.Panel>
       </Accordion.Item>
 
@@ -128,7 +144,7 @@ export const NeedToKnowAccordian = () => {
         <Accordion.Panel>
           Find My NFT was built by{" "}
           <a
-            href="https://twitter.com/0xMaki"
+            href={SOCIAL_MEDIA.twitter}
             target="_blank"
             style={{
               color: "orange",
@@ -139,7 +155,7 @@ export const NeedToKnowAccordian = () => {
           </a>
           . It is open source and you can find the code on{" "}
           <a
-            href=""
+            href={GITHUB_PROJECT_URL}
             target="_blank"
             style={{
               color: "orange",
@@ -152,7 +168,7 @@ export const NeedToKnowAccordian = () => {
           project. It is a tool to help people find their NFTs. If you have any
           questions, please reach out to me on{" "}
           <a
-            href="https://twitter.com/0xMaki"
+            href={SOCIAL_MEDIA.discord}
             target="_blank"
             style={{
               color: "orange",

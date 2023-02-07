@@ -7,6 +7,7 @@ export const handleImageUrl = (image: string) => {
     if (url.includes("ipfs://")) {
       return url.replace("ipfs://", IPFS_GATEWAY);
     }
+
     return url || "";
   } catch (e) {
     return {

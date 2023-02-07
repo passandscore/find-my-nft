@@ -1,7 +1,6 @@
 import { AppProps } from "next/app";
 import Head from "next/head";
 import { useEffect, useState } from "react";
-import { useLocalStorage } from "usehooks-ts";
 import {
   MantineProvider,
   ColorSchemeProvider,

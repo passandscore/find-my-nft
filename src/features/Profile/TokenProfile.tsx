@@ -1,6 +1,5 @@
 import {
   Container,
-  Image,
   Flex,
   SegmentedControl,
   createStyles,
@@ -13,8 +12,8 @@ import { useState } from "react";
 import { ProfileButtonOptions } from "@/data-schema/enums";
 import { ContractSelectorData } from "@/data-schema/types";
 import { useBlockExplorerByChainId } from "@/web3/useBlockExplorerByChainId";
-import { ImageNotFound } from "@/features/Profile/ImageNotFound";
-import { IPFS_GATEWAY } from "@/web3/constants";
+import { ImageHandler } from "@/features/Profile/ImageHandler";
+import { IconWindowMaximize } from "@tabler/icons-react";
 
 const useStyles = createStyles((theme) => ({
   root: {
@@ -43,12 +42,12 @@ const useStyles = createStyles((theme) => ({
 
 const ImageContainer = styled.div`
   margin: 30px auto;
+  margin-bottom: 10px;
   max-width: 600px;
   min-width: 400px;
   height: 70vh;
   padding: 20px;
   position: relative;
-  box-shadow: rgba(0, 0, 0, 0.09) 0px 3px 12px;
   border-radius: 35px;
 `;
 
@@ -68,12 +67,30 @@ const ContractDataContainer = styled.div`
   margin-left: 40px;
 `;
 
+const OpenInWindowButton = styled.div`
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  z-index: 1;
+  cursor: pointer;
+  border-radius: 50%;
+  color: white;
+  background-image: linear-gradient(45deg, #ffb800, #ff6b00);
+  padding: 15px;
+  padding-bottom: 10px;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
 export function TokenProfile({
   nftData,
   width,
 }: {
   nftData: any;
   width: number;
+  selectedTokenId: string;
 }) {
   const { contract_address, contract_name, contract_ticker_symbol } =
     nftData.contractData;
@@ -119,15 +136,6 @@ export function TokenProfile({
     },
   ] as ContractSelectorData[];
 
-  const handleImageUrl = () => {
-    let url = image;
-
-    if (url.includes("ipfs://")) {
-      return url.replace("ipfs://", IPFS_GATEWAY);
-    }
-    return url || "";
-  };
-
   const handleSelection = (selection: ProfileButtonOptions) => {
     setSelectedButton(selection);
   };
@@ -140,13 +148,14 @@ export function TokenProfile({
     <>
       {/* Display NFT image */}
       <ImageContainer>
-        {selectedButton === ProfileButtonOptions.NFT_IMAGE &&
-          (hasImage ? (
-            <Image src={handleImageUrl()} alt="Nft-Image" />
-          ) : (
-            <ImageNotFound />
-          ))}
-
+        {selectedButton === ProfileButtonOptions.NFT_IMAGE && hasImage && (
+          <>
+            <OpenInWindowButton onClick={() => window.open(image, "_blank")}>
+              <IconWindowMaximize />
+            </OpenInWindowButton>
+            <ImageHandler src={image} />
+          </>
+        )}
         {/* Display contract data */}
         {selectedButton === ProfileButtonOptions.CONTRACT && (
           <ExternalDataContainer>
