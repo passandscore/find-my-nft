@@ -6,14 +6,16 @@ export default async function TokenRequestTestById(
   req: NextApiRequest,
   res: NextApiResponse<TokenRequest | string>
 ) {
-  const { chainId, address, providedTokenId, testApiKey } = req.body as {
-    chainId: number;
-    address: string;
-    providedTokenId: string;
-    testApiKey: string;
-  };
+  const { chainId, address, providedTokenId, testApiKey, testApiVersion } =
+    req.body as {
+      chainId: number;
+      address: string;
+      providedTokenId: string;
+      testApiKey: string;
+      testApiVersion: string;
+    };
 
-  const endpoint = `https://api.covalenthq.com/v1/${chainId}/tokens/${address}/nft_metadata/${providedTokenId}/?key=${testApiKey}`;
+  const endpoint = `https://api.covalenthq.com/${testApiVersion}/${chainId}/tokens/${address}/nft_metadata/${providedTokenId}/?key=${testApiKey}`;
 
   try {
     const response = await axios.get(endpoint);

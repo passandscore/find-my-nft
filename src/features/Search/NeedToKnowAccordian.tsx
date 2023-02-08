@@ -1,4 +1,4 @@
-import { Accordion, Button, Flex, Input, Text } from "@mantine/core";
+import { Accordion, Button, Flex, Input, Select, Text } from "@mantine/core";
 import {
   COVALENT_API_SIGNUP,
   SOCIAL_MEDIA,
@@ -7,25 +7,57 @@ import {
 import { IconKey } from "@tabler/icons-react";
 import { useEffect, useState, useRef } from "react";
 import { showNotification } from "@mantine/notifications";
-import { COVALENT_API, API_KEY_VALIDATION } from "@/web3/constants";
+import {
+  COVALENT_API,
+  API_KEY_VALIDATION,
+  COVALENT_API_VERSION,
+} from "@/web3/constants";
 import { RequestTestTokenId } from "@/BFF";
 
 export const NeedToKnowAccordian = () => {
   const [storedApiKey, setStoredApiKey] = useState<string | null>(null);
+  const [storedApiVersion, setStoredApiVersion] = useState<string | null>(null);
+  const [selectedApiVersion, setSelectedApiVersion] = useState<string | null>(
+    null
+  );
   const [loading, setLoading] = useState<boolean>(false);
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const apiKeyRef = useRef<HTMLInputElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const RemoveApiKey = () => {
+    localStorage.removeItem(COVALENT_API);
+    apiKeyRef.current!.value = "";
+    setStoredApiKey(null);
+
+    localStorage.removeItem(COVALENT_API_VERSION);
+    setStoredApiVersion(null);
+    setSelectedApiVersion(null);
+  };
 
   const handleApiKey = async () => {
-    const input = inputRef.current?.value;
+    const key = apiKeyRef.current?.value;
+    const buttonName = buttonRef.current?.innerText;
+
+    if (buttonName === "Remove") {
+      RemoveApiKey();
+      return;
+    }
 
     if (storedApiKey) {
       localStorage.removeItem(COVALENT_API);
       setStoredApiKey(null);
-      inputRef.current!.value = "";
+      apiKeyRef.current!.value = "";
       return;
     }
-    if (!input) {
+
+    if (storedApiVersion) {
+      localStorage.removeItem(COVALENT_API_VERSION);
+      setStoredApiVersion(null);
+      return;
+    }
+
+    if (!key) {
       showNotification({
         title: "Error",
         message: "Please enter an API key.",
@@ -34,16 +66,24 @@ export const NeedToKnowAccordian = () => {
       return;
     }
 
-    // Run a test query to make sure the API key is valid
-    localStorage.setItem(COVALENT_API, input!);
+    if (!selectedApiVersion) {
+      showNotification({
+        title: "Error",
+        message: "Please enter an API version.",
+        color: "red",
+      });
+      return;
+    }
 
+    // Run a test query to make sure the API key is valid
     setLoading(true);
 
     const apiKeyTestResponse = await RequestTestTokenId(
       API_KEY_VALIDATION.tokenId,
       API_KEY_VALIDATION.chainId,
       API_KEY_VALIDATION.contractAddress,
-      input!
+      key!,
+      selectedApiVersion!
     );
 
     setLoading(false);
@@ -54,18 +94,26 @@ export const NeedToKnowAccordian = () => {
         message: "There was an error with the API key.",
         color: "red",
       });
-      localStorage.removeItem(COVALENT_API);
       return;
     }
 
-    localStorage.setItem(COVALENT_API, input!);
-    setStoredApiKey(input!);
+    localStorage.setItem(COVALENT_API, key!);
+    localStorage.setItem(COVALENT_API_VERSION, selectedApiVersion!);
+
+    setStoredApiKey(key!);
+    setStoredApiVersion(selectedApiVersion!);
   };
 
   useEffect(() => {
     const apiKey = localStorage.getItem(COVALENT_API);
+    const apiVersion = localStorage.getItem(COVALENT_API_VERSION);
     if (apiKey) {
+      console.log("apiKey", apiKey);
       setStoredApiKey(apiKey);
+    }
+    if (apiVersion) {
+      console.log("apiVersion", apiVersion);
+      setStoredApiVersion(apiVersion);
     }
   }, []);
 
@@ -88,15 +136,33 @@ export const NeedToKnowAccordian = () => {
           </a>
           <Flex align="center" justify="space-between" mt={20}>
             <Input
-              ref={inputRef}
+              ref={apiKeyRef}
               icon={<IconKey />}
               placeholder="Enter your API key here"
               defaultValue={storedApiKey!}
               style={{
                 width: "100%",
+                marginRight: 10,
               }}
+              disabled={storedApiKey ? true : false}
             />
+
+            {/* API Version */}
+            <Select
+              placeholder="Version"
+              defaultValue={storedApiVersion!}
+              data={[
+                { label: "V1", value: "v1" },
+                { label: "V2", value: "v2" },
+                { label: "V3", value: "v3" },
+              ]}
+              value={selectedApiVersion}
+              onChange={setSelectedApiVersion}
+              disabled={storedApiVersion ? true : false}
+            />
+
             <Button
+              ref={buttonRef}
               color="yellow"
               radius="sm"
               size="sm"

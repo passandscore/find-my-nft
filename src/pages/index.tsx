@@ -81,6 +81,7 @@ export default function FindMyNft() {
         title="Need to know"
         centered
         size="xl"
+        closeOnClickOutside={false}
       >
         <NeedToKnowAccordian />
       </Modal>

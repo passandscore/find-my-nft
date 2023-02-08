@@ -2,7 +2,8 @@ export const RequestTestTokenId = async (
   providedTokenId: string,
   chainId: string,
   address: string,
-  testApiKey: string
+  testApiKey: string,
+  testApiVersion: string
 ) => {
   try {
     const covalentData = await fetch(
@@ -17,6 +18,7 @@ export const RequestTestTokenId = async (
           address,
           providedTokenId,
           testApiKey,
+          testApiVersion,
         }),
       }
     );

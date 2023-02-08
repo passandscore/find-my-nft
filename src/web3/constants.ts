@@ -8,6 +8,7 @@ export const API_KEY_VALIDATION = {
   chainId: "1",
 };
 export const COVALENT_API = "covalentApiKey";
+export const COVALENT_API_VERSION = "covalentApiVersion";
 
 ("covalentApiKey");
 export const SOCIAL_MEDIA = {
