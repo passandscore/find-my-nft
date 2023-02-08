@@ -5,7 +5,7 @@ export const RequestTestTokenId = async (
   testApiKey: string
 ) => {
   try {
-    const convalentData = await fetch(
+    const covalentData = await fetch(
       `http://localhost:3000/api/request-test-token-id`,
       {
         method: "POST",
@@ -20,7 +20,7 @@ export const RequestTestTokenId = async (
         }),
       }
     );
-    if (!convalentData.ok) {
+    if (!covalentData.ok) {
       return {
         networkError: true,
       };

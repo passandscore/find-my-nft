@@ -1,0 +1,18 @@
+{
+  "rules": {
+    "import/prefer-default-export": "off",
+    "no-console": "off",
+    "no-dupe-class-members": "warn",
+    "unicorn/prevent-abbreviations": "warn",
+    "unicorn/better-regex": "warn",
+    "unicorn/catch-error-name": "warn",
+    "unicorn/prefer-module": "warn",
+    "unicorn/prefer-number-properties": "warn",
+    "unicorn/no-static-only-class": "warn",
+    "consistent-return": "warn",
+    "unicorn/no-null": "warn",
+    "unicorn/filename-case": "warn",
+    "unicorn/numeric-separators-style": "warn",
+    "react/no-unknown-property": "warn"
+  }
+}

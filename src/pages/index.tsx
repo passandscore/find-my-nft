@@ -2,9 +2,9 @@ import { useState } from "react";
 import { ComponentStates } from "@/data-schema/enums";
 import { Header } from "@/features/Header/Header";
 import { SocialsMenu } from "@/features/Socials/SocialsMenu";
-import { InputsWithButton } from "@/features/Search/InputFields";
-import { TokenCollection } from "@/features/Collection/TokenCollection";
-import { TokenProfile } from "@/features/Profile/TokenProfile";
+import { SearchForm } from "@/features/Search";
+import { TokenCollection } from "@/features/Collection";
+import { TokenProfile } from "@/features/Profile";
 import { useWindowSize } from "usehooks-ts";
 import { Modal } from "@mantine/core";
 import { NeedToKnowAccordian } from "@/features/Search/NeedToKnowAccordian";
@@ -50,14 +50,11 @@ export default function FindMyNft() {
 
       {currentComponent === ComponentStates.INPUTS && (
         <>
-          <InputsWithButton
+          <SearchForm
             changeComponent={changeComponent}
             handleNftData={handleNftData}
-            handleIsError={handleIsError}
-            isError={isError}
             handleIsLoading={handleIsLoading}
             isLoading={isLoading}
-            nftData={nftData}
             setOpenNeedToKnow={setOpenNeedToKnow}
           />
           {!isError && !isLoading && (

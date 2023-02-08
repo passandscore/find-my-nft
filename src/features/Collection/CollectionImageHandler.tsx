@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 
-export const ImageHandler = ({
+export const CollectionImageHandler = ({
   src,
   allImagesLoaded,
   index,

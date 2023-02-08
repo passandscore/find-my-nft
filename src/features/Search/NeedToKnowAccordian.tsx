@@ -7,10 +7,7 @@ import {
 import { IconKey } from "@tabler/icons-react";
 import { useEffect, useState, useRef } from "react";
 import { showNotification } from "@mantine/notifications";
-import {
-  COVALENT_KEY_LOCAL_STORAGE_TITLE,
-  API_KEY_VALIDATION,
-} from "@/web3/constants";
+import { COVALENT_API, API_KEY_VALIDATION } from "@/web3/constants";
 import { RequestTestTokenId } from "@/BFF";
 
 export const NeedToKnowAccordian = () => {
@@ -23,7 +20,7 @@ export const NeedToKnowAccordian = () => {
     const input = inputRef.current?.value;
 
     if (storedApiKey) {
-      localStorage.removeItem(COVALENT_KEY_LOCAL_STORAGE_TITLE);
+      localStorage.removeItem(COVALENT_API);
       setStoredApiKey(null);
       inputRef.current!.value = "";
       return;
@@ -38,7 +35,7 @@ export const NeedToKnowAccordian = () => {
     }
 
     // Run a test query to make sure the API key is valid
-    localStorage.setItem(COVALENT_KEY_LOCAL_STORAGE_TITLE, input!);
+    localStorage.setItem(COVALENT_API, input!);
 
     setLoading(true);
 
@@ -57,16 +54,16 @@ export const NeedToKnowAccordian = () => {
         message: "There was an error with the API key.",
         color: "red",
       });
-      localStorage.removeItem(COVALENT_KEY_LOCAL_STORAGE_TITLE);
+      localStorage.removeItem(COVALENT_API);
       return;
     }
 
-    localStorage.setItem(COVALENT_KEY_LOCAL_STORAGE_TITLE, input!);
+    localStorage.setItem(COVALENT_API, input!);
     setStoredApiKey(input!);
   };
 
   useEffect(() => {
-    const apiKey = localStorage.getItem(COVALENT_KEY_LOCAL_STORAGE_TITLE);
+    const apiKey = localStorage.getItem(COVALENT_API);
     if (apiKey) {
       setStoredApiKey(apiKey);
     }

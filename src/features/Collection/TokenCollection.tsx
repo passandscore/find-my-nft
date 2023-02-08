@@ -1,11 +1,9 @@
 import {
   Pagination,
   Card,
-  Flex,
   Box,
   SimpleGrid,
   Center,
-  Badge,
   Skeleton,
   Text,
   Transition,
@@ -15,10 +13,12 @@ import { useCallback, useEffect, useState } from "react";
 import { prepareRequestByTokenId } from "@/BFF";
 import { SelectedTokenCard } from "@/features/Collection/SelectedTokenCard";
 import { useWindowSize } from "usehooks-ts";
-import Image from "next/image";
 import { handleImageUrl } from "@/web3/useHandleImageUrl";
-import { COVALENT_KEY_LOCAL_STORAGE_TITLE } from "@/web3/constants";
-import { ImageHandler } from "@/features/Collection/ImageHandler";
+import {
+  CollectionImageHandler,
+  CollectionImageOverlay,
+} from "@/features/Collection";
+import { COVALENT_API } from "@/web3/constants";
 
 export function TokenCollection({
   nftData,
@@ -47,11 +47,11 @@ export function TokenCollection({
 
   const tokenData = async (selectedPage: number) => {
     try {
-      const providedApiKey = localStorage.getItem(
-        COVALENT_KEY_LOCAL_STORAGE_TITLE
-      );
+      const providedApiKey = localStorage.getItem(COVALENT_API);
+
       const startIndex = (selectedPage - 1) * itemsPerPage;
       const endIndex = startIndex + itemsPerPage;
+
       const data = Promise.all(
         items.slice(startIndex, endIndex).map(async (item: any) => {
           const { token_id } = item;
@@ -86,16 +86,15 @@ export function TokenCollection({
   };
 
   const handleSelectedToken = (tokenId: string) => () => {
-    const providedApiKey = localStorage.getItem(
-      COVALENT_KEY_LOCAL_STORAGE_TITLE
-    );
+    const providedApiKey = localStorage.getItem(COVALENT_API);
+
     prepareRequestByTokenId(
       tokenId,
       selectedChainId,
       selectedContractAddress,
       providedApiKey || ""
     ).then((tokenData) => {
-      setSelectedCardTokenData({ ...tokenData.data });
+      setSelectedCardTokenData({ ...tokenData?.data });
       setOpenTokenCard(true);
     });
   };
@@ -104,24 +103,30 @@ export function TokenCollection({
     const totalPages = Math.ceil(collectionTotal / itemsPerPage);
     const itemsOnFinalPage = collectionTotal % itemsPerPage;
     const currentPage = page;
-    const items = currentPage === totalPages ? 8 : itemsOnFinalPage;
+
+    const items =
+      currentPage === totalPages
+        ? itemsPerPage
+        : itemsOnFinalPage || itemsPerPage;
+
     if (currentImage === items) {
-      setLoadingPage(false);
-      handleIsLoading(false);
+      // if not at top of screeen, scroll to top
+      if (window.scrollY > 0) {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "smooth",
+        });
+      }
+
+      setTimeout(() => {
+        setLoadingPage(false);
+        handleIsLoading(false);
+      }, 1000);
     }
   }, []);
 
-  // Used for initial load
-  useEffect(() => {
-    if (width > 0) return;
-    setLoadingPage(true);
-    tokenData(1).then((data) => {
-      setCurrentPageData(data);
-      setShowPagination(true);
-    });
-  }, [width]);
-
-  // Used for page change
+  //-----Used for page change-----
   const handlePageChange = (selectedPage: number) => {
     if (selectedPage === page) return;
 
@@ -130,7 +135,7 @@ export function TokenCollection({
 
     setLoadingPage(true);
 
-    // load new page data
+    //-------Check if page has data, if not, load previous page data-----
     tokenData(selectedPage).then((data) => {
       // If no data,
       if (data?.length === 0) {
@@ -175,6 +180,16 @@ export function TokenCollection({
     }
   };
 
+  //-----Used for initial load of page data-----
+  useEffect(() => {
+    if (width > 0) return;
+    setLoadingPage(true);
+    tokenData(1).then((data) => {
+      setCurrentPageData(data);
+      setShowPagination(true);
+    });
+  }, [width]);
+
   const mappedCards = currentPageData?.map(
     (item: { tokenId: string; image: string }, index: number) => (
       <Card
@@ -190,63 +205,20 @@ export function TokenCollection({
       >
         <Card.Section>
           <Skeleton visible={loadingPage}>
-            {item.image ? (
+            {item.image && (
               <>
-                <ImageHandler
+                <CollectionImageHandler
                   src={item.image}
                   allImagesLoaded={allImagesLoaded}
                   index={index}
                   handleDimensions={handleDimensions}
                 />
 
-                <Flex
-                  sx={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    backgroundColor: "rgba(0,0,0,0.5)",
-                    backdropFilter: "blur(5px)",
-                    color: "white",
-                    opacity: 0,
-                    transition: "opacity 0.3s ease-in-out",
-                    zIndex: 1,
-                    "&:hover": {
-                      opacity: 1,
-                    },
-                  }}
-                >
-                  <Box>
-                    <Badge
-                      sx={{
-                        cursor: "pointer",
-                        marginLeft: 10,
-                      }}
-                      size="lg"
-                      variant="gradient"
-                      gradient={{ from: "yellow", to: "orange" }}
-                      onClick={handleSelectedToken(item.tokenId)}
-                    >
-                      {`view token ${item.tokenId}`}
-                    </Badge>
-                  </Box>
-                </Flex>
+                <CollectionImageOverlay
+                  handleSelectedToken={handleSelectedToken}
+                  item={item}
+                />
               </>
-            ) : (
-              <Image
-                src="/imgs/placeholder.png"
-                style={{
-                  width: "275px",
-                  height: "275px",
-                  objectFit: "cover",
-                }}
-                width={200}
-                height={200}
-                alt="NFT"
-              />
             )}
           </Skeleton>
         </Card.Section>

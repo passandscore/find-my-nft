@@ -1,17 +1,20 @@
+import { ErrorMessages } from "@/data-schema/enums";
+import { showNotification } from "@mantine/notifications";
+
 export const prepareRequestAllTokens = async (
   chainId: string,
   address: string,
-  handleIsError: (error: boolean) => void,
-  providedApiKey: string
+  providedApiKey: string,
+  handleIsLoading: (isLoading: boolean) => void
 ) => {
   try {
     // used to control the fetch request and abort it if it takes too long
     const controller = new AbortController();
     const { signal } = controller;
 
-    setTimeout(() => controller.abort(), 10000); // 10sec
+    setTimeout(() => controller.abort(), 20000); // 20sec
 
-    const convalentData = await fetch(
+    const covalentData = await fetch(
       `http://localhost:3000/api/request-by-contract`,
       {
         method: "POST",
@@ -27,38 +30,39 @@ export const prepareRequestAllTokens = async (
       }
     );
 
-    if (!convalentData.ok) {
-      return {
-        networkError: true,
-      };
+    if (!covalentData.ok) {
+      throw new Error(ErrorMessages.NETWORK);
     }
 
-    const convalentDataJson = await convalentData.json();
-
-    const totalItems = convalentDataJson?.data?.items.length;
+    const covalentDataJson = await covalentData.json();
+    const totalItems = covalentDataJson?.data?.items.length;
     const hasData = totalItems > 0;
 
-    const { error_message } = convalentDataJson;
-
-    if (!hasData) {
-      throw new Error("No metadata found.");
-    }
-
+    const { error_message } = covalentDataJson;
     if (error_message) {
       throw new Error(error_message);
     }
 
-    return { data: convalentDataJson, error: "", networkError: false };
-  } catch (e) {
-    if ((e as Error).name == "AbortError") {
-      handleIsError(true);
-      return {
-        error: "Covalent API timed out.",
-      };
+    if (!hasData) {
+      throw new Error(ErrorMessages.METADATA);
     }
 
-    return {
-      error: (e as Error).message,
-    };
+    return { data: covalentDataJson };
+  } catch (e) {
+    handleIsLoading(false);
+
+    if ((e as Error).name == "AbortError") {
+      showNotification({
+        title: "Error",
+        message: ErrorMessages.API_TIMEOUT,
+        color: "red",
+      });
+    } else {
+      showNotification({
+        title: "Error",
+        message: (e as Error).message,
+        color: "red",
+      });
+    }
   }
 };

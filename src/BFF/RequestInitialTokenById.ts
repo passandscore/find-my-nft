@@ -1,11 +1,14 @@
+import { ErrorMessages } from "@/data-schema/enums";
+import { showNotification } from "@mantine/notifications";
+
 export const prepareRequestInitialTokenById = async (
   providedTokenId: string,
   chainId: string,
   address: string,
-  handleIsError: (error: boolean) => void
+  handleIsLoading: (isLoading: boolean) => void
 ) => {
   try {
-    const convalentData = await fetch(
+    const covalentData = await fetch(
       `http://localhost:3000/api/request-by-token-id`,
       {
         method: "POST",
@@ -19,28 +22,36 @@ export const prepareRequestInitialTokenById = async (
         }),
       }
     );
-    if (!convalentData.ok) {
-      handleIsError(true);
-      return { hasInitialData: false, error: "", networkError: true };
+
+    if (!covalentData.ok) {
+      throw new Error(ErrorMessages.NETWORK);
     }
 
-    const convalentDataJson = await convalentData.json();
-    const { contract_name } = convalentDataJson?.data?.items[0];
-    const hasData = Boolean(
-      convalentDataJson?.data?.items[0]?.nft_data !== null
-    );
+    const covalentDataJson = await covalentData.json();
+    const { contract_name, nft_data } = covalentDataJson?.data?.items[0];
 
-    const { error_message } = convalentDataJson;
-
-    if (!hasData || error_message) {
-      handleIsError(true);
-      return { hasInitialData: false, error: "", contractName: contract_name };
+    const { error_message } = covalentDataJson;
+    if (error_message) {
+      throw new Error(error_message);
     }
 
-    return { hasInitialData: true, error: "", contractName: contract_name };
+    if (!contract_name) {
+      throw new Error(ErrorMessages.CONTRACT);
+    }
+
+    const hasData = Boolean(nft_data !== null);
+    if (!hasData) {
+      throw new Error(ErrorMessages.METADATA);
+    }
+
+    return { hasData };
   } catch (e) {
-    return {
-      error: (e as Error).message,
-    };
+    handleIsLoading(false);
+
+    showNotification({
+      title: "Error",
+      message: (e as Error).message,
+      color: "red",
+    });
   }
 };

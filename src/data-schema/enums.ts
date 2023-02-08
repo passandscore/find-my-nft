@@ -28,3 +28,10 @@ export enum NetworkEnviroments {
   MAINNET = "MAINNET",
   TESTNET = "TESTNET",
 }
+
+export enum ErrorMessages {
+  NETWORK = "An error occurred while fetching the data",
+  CONTRACT = "No contract found. Check your address and network",
+  METADATA = "No metadata found. Check your address and network",
+  API_TIMEOUT = "The API is taking too long to respond",
+}

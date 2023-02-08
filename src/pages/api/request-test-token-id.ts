@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { TokenRequest } from "@/data-schema/types";
 import axios from "axios";
-import { COVALENT_KEY_LOCAL_STORAGE_TITLE } from "@/web3/constants";
 
 export default async function TokenRequestTestById(
   req: NextApiRequest,

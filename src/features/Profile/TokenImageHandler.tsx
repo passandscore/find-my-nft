@@ -9,7 +9,7 @@ const handleImageUrl = (image: string) => {
   return image || "";
 };
 
-export const ImageHandler = ({ src }: { src: string }) => {
+export const TokenImageHandler = ({ src }: { src: string }) => {
   const [imageUrl, setImageUrl] = useState(handleImageUrl(src));
 
   return (

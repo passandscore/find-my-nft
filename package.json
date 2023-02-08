@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint --ext .js,.jsx ."
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn run lint"
+    }
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
@@ -28,7 +33,9 @@
     "axios": "^1.2.6",
     "cryptocurrency-icons": "^0.18.1",
     "dotenv": "^16.0.3",
+    "eslint": "^8.33.0",
     "ethers": "^5.7.2",
+    "husky": "^8.0.3",
     "next": "13.1.6",
     "react": "18.2.0",
     "react-crypto-icons": "^1.0.5",

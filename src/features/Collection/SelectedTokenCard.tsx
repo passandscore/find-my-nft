@@ -32,11 +32,7 @@ export const SelectedTokenCard = ({
         overlayOpacity={0.5}
         centered
       >
-        <TokenProfile
-          nftData={selectedCardTokenData}
-          width={width}
-          selectedTokenId={selectedTokenId}
-        />
+        <TokenProfile nftData={selectedCardTokenData} width={width} />
       </StyledModal>
     </>
   );

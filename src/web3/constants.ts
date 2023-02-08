@@ -7,7 +7,9 @@ export const API_KEY_VALIDATION = {
   tokenId: "1",
   chainId: "1",
 };
-export const COVALENT_KEY_LOCAL_STORAGE_TITLE = "covalentApiKey";
+export const COVALENT_API = "covalentApiKey";
+
+("covalentApiKey");
 export const SOCIAL_MEDIA = {
   twitter: "https://twitter.com/passandscore",
   linkedin: "https://www.linkedin.com/in/jason-schwarz-75b91482/",
@@ -16,13 +18,13 @@ export const SOCIAL_MEDIA = {
 };
 export const COVALENT_API_SIGNUP =
   "https://www.covalenthq.com/platform/#/auth/register/";
-export const mainnetNetworkNames = [
+export const MAINNET_NETWORK_NAMES = [
   { value: "1", label: "Ethereum" },
   { value: "137", label: "Polygon" },
   { value: "56", label: "Binance Smart Chain" },
 ];
 
-export const testnetNetworkNames = [
+export const TESTNET_NETWORK_NAMES = [
   { value: "5", label: "Goerli" },
   { value: "4", label: "Rinkeby" },
   { value: "42", label: "Kovan" },
