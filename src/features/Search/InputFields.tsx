@@ -22,6 +22,14 @@ export const InputFields = ({
   setAddress: (value: string | null) => void;
   setTokenId: (value: string) => void;
 }) => {
+  const sortedMainnetNetworkNames = MAINNET_NETWORK_NAMES.sort((a, b) =>
+    a.label > b.label ? 1 : -1
+  );
+
+  const sortedTestnetNetworkNames = TESTNET_NETWORK_NAMES.sort((a, b) =>
+    a.label > b.label ? 1 : -1
+  );
+
   return (
     <>
       {/* Switch - Find by token id */}
@@ -65,10 +73,14 @@ export const InputFields = ({
         size="lg"
         data={
           networkType === NetworkEnviroments.MAINNET
-            ? MAINNET_NETWORK_NAMES
-            : TESTNET_NETWORK_NAMES
+            ? sortedMainnetNetworkNames
+            : sortedTestnetNetworkNames
         }
-        placeholder="Select a network"
+        placeholder={
+          networkType === NetworkEnviroments.MAINNET
+            ? "Select a network"
+            : "Select a test network"
+        }
         clearable
         value={chainId}
         onChange={setChainId}

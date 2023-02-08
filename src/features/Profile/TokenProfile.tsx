@@ -78,7 +78,10 @@ export function TokenProfile({
       label: "Contract Address",
       value: contract_address,
       badge: true,
-      badgeUrl: useBlockExplorerByChainId(nftData.chainId, contract_address),
+      badgeUrl: useBlockExplorerByChainId(
+        nftData.selectedChainId,
+        contract_address
+      ),
     },
     {
       label: "Contract Symbol",
@@ -89,13 +92,16 @@ export function TokenProfile({
       label: "Original Owner",
       value: original_owner,
       badge: true,
-      badgeUrl: useBlockExplorerByChainId(nftData.chainId, original_owner),
+      badgeUrl: useBlockExplorerByChainId(
+        nftData.selectedChainId,
+        original_owner
+      ),
     },
     {
       label: "Current Owner",
       value: owner,
       badge: true,
-      badgeUrl: useBlockExplorerByChainId(nftData.chainId, owner),
+      badgeUrl: useBlockExplorerByChainId(nftData.selectedChainId, owner),
     },
   ] as ContractSelectorData[];
 

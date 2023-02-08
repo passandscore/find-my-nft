@@ -108,11 +108,9 @@ export const NeedToKnowAccordian = () => {
     const apiKey = localStorage.getItem(COVALENT_API);
     const apiVersion = localStorage.getItem(COVALENT_API_VERSION);
     if (apiKey) {
-      console.log("apiKey", apiKey);
       setStoredApiKey(apiKey);
     }
     if (apiVersion) {
-      console.log("apiVersion", apiVersion);
       setStoredApiVersion(apiVersion);
     }
   }, []);
