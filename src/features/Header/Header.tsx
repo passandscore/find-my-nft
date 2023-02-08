@@ -1,15 +1,10 @@
-import {
-  ActionIcon,
-  Box,
-  Flex,
-  Text,
-  useMantineColorScheme,
-} from "@mantine/core";
+import { Box, Flex, Text, useMantineColorScheme } from "@mantine/core";
 import Link from "next/link";
 import { ComponentStates } from "@/data-schema/enums";
 import styled from "@emotion/styled";
 import { IconSun, IconMoon } from "@tabler/icons-react";
 import { colaventLg, colaventSm } from "./icons";
+import { useState } from "react";
 
 const StyledLogo = styled.div`
   position: relative;
@@ -46,8 +41,16 @@ export const Header = ({
   handleIsError: (error: boolean) => void;
   handleIsLoading: (loading: boolean) => void;
 }) => {
+  const [iconColor, setIconColor] = useState("");
+
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const dark = colorScheme === "dark";
+
+  const StyledThemeLogo = styled.div`
+    &:hover {
+      color: ${iconColor};
+    }
+  `;
 
   const handleColorScheme = () => {
     if (colorScheme === "dark") {
@@ -99,13 +102,21 @@ export const Header = ({
             </Link>
           )}
           {dark ? (
-            <ActionIcon variant="subtle" onClick={() => handleColorScheme()}>
+            <StyledThemeLogo
+              onClick={() => handleColorScheme()}
+              onMouseOver={() => setIconColor("orange")}
+              onMouseOut={() => setIconColor("")}
+            >
               <IconSun size={30} />
-            </ActionIcon>
+            </StyledThemeLogo>
           ) : (
-            <ActionIcon variant="subtle" onClick={() => handleColorScheme()}>
+            <StyledThemeLogo
+              onClick={() => handleColorScheme()}
+              onMouseOver={() => setIconColor("orange")}
+              onMouseOut={() => setIconColor("")}
+            >
               <IconMoon size={30} />
-            </ActionIcon>
+            </StyledThemeLogo>
           )}
         </Flex>
       </Flex>
