@@ -21,13 +21,12 @@ export const ImageHandler = ({
       onError={() => setImageUrl("/imgs/placeholder.png")}
       alt="NFT"
       style={{
-        width: handleDimensions(),
-        height: handleDimensions(),
-        // objectFit: "contain",
+        width: "100%",
+        height: "100%",
         objectFit: "scale-down",
       }}
-      width={100}
-      height={350}
+      width={Number(handleDimensions())}
+      height={Number(handleDimensions())}
       quality={10}
       priority
       onLoadingComplete={() => allImagesLoaded(index + 1)}

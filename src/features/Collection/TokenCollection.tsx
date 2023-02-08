@@ -101,7 +101,11 @@ export function TokenCollection({
   };
 
   const allImagesLoaded = useCallback((currentImage: number) => {
-    if (currentImage === itemsPerPage) {
+    const totalPages = Math.ceil(collectionTotal / itemsPerPage);
+    const itemsOnFinalPage = collectionTotal % itemsPerPage;
+    const currentPage = page;
+    const items = currentPage === totalPages ? 8 : itemsOnFinalPage;
+    if (currentImage === items) {
       setLoadingPage(false);
       handleIsLoading(false);
     }
@@ -163,11 +167,11 @@ export function TokenCollection({
 
   const handleDimensions = () => {
     if (width > 0 && width < 768) {
-      return "475px";
+      return "475";
     } else if (width > 768 && width < 1024) {
-      return "375px";
+      return "375";
     } else {
-      return "275px";
+      return "275";
     }
   };
 
@@ -178,7 +182,7 @@ export function TokenCollection({
         style={{
           backgroundColor: "transparent",
           width: "100%",
-          height: handleDimensions(),
+          height: `${handleDimensions()}px`,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -276,7 +280,7 @@ export function TokenCollection({
               <Pagination
                 page={page}
                 onChange={(p) => handlePageChange(p)}
-                total={collectionTotal}
+                total={Math.ceil(collectionTotal / itemsPerPage)}
                 size="xl"
                 boundaries={2}
               />
