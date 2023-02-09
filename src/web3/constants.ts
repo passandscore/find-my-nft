@@ -14,7 +14,7 @@ export const COVALENT_API_VERSION = "covalentApiVersion";
 export const SOCIAL_MEDIA = {
   twitter: "https://twitter.com/passandscore",
   linkedin: "https://www.linkedin.com/in/jason-schwarz-75b91482/",
-  github: " https://github.com/passandscore",
+  github: "https://github.com/passandscore",
   discord: "https://discord.gg/jXPnv2t5mN",
 };
 export const COVALENT_API_SIGNUP =

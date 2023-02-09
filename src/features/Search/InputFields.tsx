@@ -66,9 +66,11 @@ export const InputFields = ({
       </Flex>
 
       {/* Select - Chain id */}
+
       <Select
         icon={<IconLink size={18} stroke={1.5} />}
         mb={30}
+        searchable
         radius="xl"
         size="lg"
         data={
@@ -84,6 +86,7 @@ export const InputFields = ({
         clearable
         value={chainId}
         onChange={setChainId}
+        nothingFound="Network not found"
       />
 
       {/* Input - Contract address */}

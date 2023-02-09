@@ -19,7 +19,7 @@ export const TokenImageHandler = ({ src }: { src: string }) => {
       quality={100}
       width={100}
       height={100}
-      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      style={{ width: "100%", height: "100%" }}
       onError={() => setImageUrl("/imgs/placeholder-lg.png")}
     />
   );
