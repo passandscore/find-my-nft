@@ -1,13 +1,10 @@
-export const RequestTestTokenId = async (
-  providedTokenId: string,
+export const RequestApiConnection = async (
   chainId: string,
-  address: string,
-  testApiKey: string,
-  testApiVersion: string
+  testApiKey: string
 ) => {
   try {
     const covalentData = await fetch(
-      `http://localhost:3000/api/request-test-token-id`,
+      `http://localhost:3000/api/request-api-connection`,
       {
         method: "POST",
         headers: {
@@ -15,10 +12,7 @@ export const RequestTestTokenId = async (
         },
         body: JSON.stringify({
           chainId,
-          address,
-          providedTokenId,
           testApiKey,
-          testApiVersion,
         }),
       }
     );

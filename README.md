@@ -50,14 +50,29 @@
 </p>
 
 <pre>
-// Step 1
+Step 1
 git clone https://github.com/passandscore/find-my-nft.git
 
-// Step 2
+Step 2
 yarn run findmynft
 
-// Step 3
+Step 3
 Open your browser and go to http://localhost:3000/
+</pre>
+
+<hr />
+
+<h2 style="color:orange">Enviroment Variables</h2>
+
+<p>
+  <strong>This step is optional as you can provide the key throught the UI</strong>
+</p>
+
+<pre>
+Create a .env file on the root of the project and add the following
+
+COVALENT_API_KEY="<'YOUR_V1_KEY_HERE'>"
+
 </pre>
 
 <hr />
@@ -134,10 +149,9 @@ Open your browser and go to http://localhost:3000/
 <strong>You can find me on social media:</strong>
 
 <div style="position:flex;  padding-top:.2rem">
-<a href="https://github.com/passandscore" style="margin-right:1rem; color:orange" target="_blank"><img src="public/imgs/socials/github.svg" alt="github"></i></a>
-<a href="https://www.linkedin.com/in/jason-schwarz-75b91482/" style="margin-right:1rem; color:orange" target="_blank"><img src="public/imgs/socials/linkedin.svg" alt="linkedin"></a>
-<a href="https://twitter.com/passandscore" style="margin-right:1rem; color:orange" target="_blank"><img src="public/imgs/socials/twitter.svg" alt="twitter"></a>
-<a href="https://discord.gg/jXPnv2t5mN" style="margin-right:1rem; color:orange;" target="_blank";><img src="public/imgs/socials/discord.svg" alt="discord"></i></a>
+<a href="https://www.linkedin.com/in/jason-schwarz-75b91482/" style="margin-right:1rem; color:orange" target="_blank"><img src="public/imgs/socials/linkedin.svg" alt="linkedin"/></a>
+<a href="https://twitter.com/passandscore" style="margin-right:1rem; color:orange" target="_blank"><img src="public/imgs/socials/twitter.svg" alt="twitter"/></a>
+<a href="https://discord.gg/jXPnv2t5mN" style="margin-right:1rem; color:orange;" target="_blank"><img src="public/imgs/socials/discord.svg" alt="discord"/></a>
 </div>
 
 </body>

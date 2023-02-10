@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { IPFS_GATEWAY } from "@/web3/constants";
 
-const handleImageUrl = (image: string) => {
+const handleUrl = (image: string) => {
   if (image.includes("ipfs://")) {
     return image.replace("ipfs://", IPFS_GATEWAY);
   }
@@ -10,7 +10,7 @@ const handleImageUrl = (image: string) => {
 };
 
 export const TokenImageHandler = ({ src }: { src: string }) => {
-  const [imageUrl, setImageUrl] = useState(handleImageUrl(src));
+  const [imageUrl, setImageUrl] = useState(handleUrl(src));
 
   return (
     <Image

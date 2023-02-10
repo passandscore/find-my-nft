@@ -10,6 +10,7 @@ import {
   SegmentedController,
 } from "@/features/Profile/";
 import { ProfileButtonOptions } from "@/data-schema/enums";
+import { Flex, Loader } from "@mantine/core";
 
 const ImageContainer = styled.div`
   margin: 30px auto;
@@ -53,9 +54,11 @@ const OpenInWindowButton = styled.div`
 export function TokenProfile({
   nftData,
   width,
+  isLoadingProfile,
 }: {
   nftData: any;
   width: number;
+  isLoadingProfile?: boolean;
 }) {
   const { contract_address, contract_name, contract_ticker_symbol } =
     nftData.contractData;
@@ -119,10 +122,26 @@ export function TokenProfile({
       <ImageContainer>
         {selectedButton === ProfileButtonOptions.NFT_IMAGE && hasImage && (
           <>
-            <OpenInWindowButton onClick={() => window.open(image, "_blank")}>
-              <IconWindowMaximize />
-            </OpenInWindowButton>
-            <TokenImageHandler src={image} />
+            {!isLoadingProfile ? (
+              <>
+                <OpenInWindowButton
+                  onClick={() => window.open(image, "_blank")}
+                >
+                  <IconWindowMaximize />
+                </OpenInWindowButton>
+                <TokenImageHandler src={image} />
+              </>
+            ) : (
+              <Flex
+                justify="center"
+                align="center"
+                style={{
+                  height: "100%",
+                }}
+              >
+                <Loader variant="bars" color="yellow" />
+              </Flex>
+            )}
           </>
         )}
 

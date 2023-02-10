@@ -1,5 +1,5 @@
 import { ProfileTokenData } from "@/data-schema/types";
-import { handleImageUrl } from "@/web3/useHandleImageUrl";
+import { handleUrl } from "@/web3/useHandleImageUrl";
 import { ErrorMessages } from "@/data-schema/enums";
 import { showNotification } from "@mantine/notifications";
 
@@ -11,6 +11,11 @@ export const prepareRequestByTokenId = async (
   handleIsLoading?: (isLoading: boolean) => void
 ) => {
   try {
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    setTimeout(() => controller.abort(), 20000); // 10sec
+
     const covalentData = await fetch(
       `http://localhost:3000/api/request-by-token-id`,
       {
@@ -24,6 +29,7 @@ export const prepareRequestByTokenId = async (
           providedTokenId,
           providedApiKey,
         }),
+        signal,
       }
     );
 
@@ -53,13 +59,56 @@ export const prepareRequestByTokenId = async (
       throw new Error(ErrorMessages.METADATA);
     }
 
-    // Fetch the metadata from the token_url
     const tokenData = nft_data[0];
+    const hasExternalData = Boolean(tokenData?.external_data !== null);
+
+    let fetchedMetadata = {} as any;
+    if (!hasExternalData) {
+      const tokenMetadata = await fetch(
+        `http://localhost:3000/api/token-metadata`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url: handleUrl(tokenData?.token_url),
+          }),
+        }
+      );
+
+      fetchedMetadata = await tokenMetadata.json();
+    }
+
+    const handleMetadataImage = () => {
+      if (hasExternalData) {
+        const metadata = tokenData?.external_data;
+        return (
+          metadata.image ||
+          metadata.image_url ||
+          metadata.external_data?.image ||
+          metadata.nft.image ||
+          metadata.external_url ||
+          ""
+        );
+      }
+
+      if (Object.keys(fetchedMetadata).length > 0) {
+        return fetchedMetadata.nft.image || "";
+      }
+
+      return (
+        tokenData?.ipfs_image ||
+        tokenData?.image_url ||
+        tokenData?.external_data.image ||
+        ""
+      );
+    };
 
     const dataByTokenId = {
       metadata: {
-        image: tokenData?.external_data.image || "",
-        token_url: handleImageUrl(tokenData?.token_url),
+        image: handleMetadataImage(),
+        token_url: handleUrl(tokenData?.token_url),
       },
       contractData: {
         contract_address,
@@ -79,10 +128,18 @@ export const prepareRequestByTokenId = async (
   } catch (e) {
     handleIsLoading && handleIsLoading(false);
 
-    showNotification({
-      title: "Error",
-      message: (e as Error).message,
-      color: "red",
-    });
+    if ((e as Error).name == "AbortError") {
+      showNotification({
+        title: "Error",
+        message: ErrorMessages.NETWORK_TOKEN_ERROR,
+        color: "red",
+      });
+    } else {
+      showNotification({
+        title: "Error",
+        message: (e as Error).message,
+        color: "red",
+      });
+    }
   }
 };

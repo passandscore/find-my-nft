@@ -32,13 +32,11 @@ export const Header = ({
   width,
   breakpoint,
   changeComponent,
-  handleIsError,
   handleIsLoading,
 }: {
   width: number;
   breakpoint: number;
   changeComponent: (component: ComponentStates) => void;
-  handleIsError: (error: boolean) => void;
   handleIsLoading: (loading: boolean) => void;
 }) => {
   const [iconColor, setIconColor] = useState("");
@@ -63,7 +61,6 @@ export const Header = ({
 
   const handleLogoClick = () => {
     changeComponent(ComponentStates.INPUTS);
-    handleIsError(false);
     handleIsLoading(false);
   };
 

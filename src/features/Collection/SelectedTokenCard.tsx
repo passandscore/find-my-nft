@@ -14,11 +14,13 @@ export const SelectedTokenCard = ({
   setOpenTokenCard,
   selectedCardTokenData,
   width,
+  isLoadingProfile,
 }: {
   openTokenCard: boolean;
   setOpenTokenCard: (value: boolean) => void;
   selectedCardTokenData: any;
   width: number;
+  isLoadingProfile: boolean;
 }) => {
   const { selectedTokenId } = selectedCardTokenData;
   return (
@@ -32,7 +34,11 @@ export const SelectedTokenCard = ({
         overlayOpacity={0.5}
         centered
       >
-        <TokenProfile nftData={selectedCardTokenData} width={width} />
+        <TokenProfile
+          nftData={selectedCardTokenData}
+          width={width}
+          isLoadingProfile={isLoadingProfile}
+        />
       </StyledModal>
     </>
   );

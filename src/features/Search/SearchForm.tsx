@@ -13,13 +13,9 @@ import { ethers } from "ethers";
 import { ProfileTokenData } from "@/data-schema/types";
 import { ComponentStates, NetworkEnviroments } from "@/data-schema/enums";
 import { Loading } from "@/features/Search/Loading";
-import {
-  prepareRequestByTokenId,
-  prepareRequestAllTokens,
-  prepareRequestInitialTokenById,
-} from "@/BFF";
+import { prepareRequestByTokenId, prepareRequestAllTokens } from "@/BFF";
 import styled from "@emotion/styled";
-import { INITIAL_TOKEN_ID, COVALENT_API } from "@/web3/constants";
+import { COVALENT_API } from "@/web3/constants";
 import { InputFields } from "@/features/Search";
 
 const StyledBox = styled.div`
@@ -62,7 +58,10 @@ export function SearchForm({
   const { colorScheme } = useMantineColorScheme();
 
   const requestByTokenId = async () => {
+    handleIsLoading(true);
+
     const providedApiKey = localStorage.getItem(COVALENT_API);
+
     const response = (await prepareRequestByTokenId(
       tokenId,
       chainId!,
@@ -88,16 +87,6 @@ export function SearchForm({
     handleIsLoading(true);
 
     const providedApiKey = localStorage.getItem(COVALENT_API);
-
-    //-----Check the first token id for metadata-----
-    const tokenTest = await prepareRequestInitialTokenById(
-      INITIAL_TOKEN_ID,
-      chainId!,
-      address!,
-      handleIsLoading
-    );
-
-    if (!tokenTest?.hasData) return;
 
     //-----Return all token ids------
     const response = (await prepareRequestAllTokens(

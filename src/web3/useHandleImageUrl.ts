@@ -1,6 +1,6 @@
 import { IPFS_GATEWAY } from "@/web3/constants";
 
-export const handleImageUrl = (image: string) => {
+export const handleUrl = (image: string) => {
   try {
     let url = image;
 

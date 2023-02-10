@@ -7,21 +7,12 @@ import {
 import { IconKey } from "@tabler/icons-react";
 import { useEffect, useState, useRef } from "react";
 import { showNotification } from "@mantine/notifications";
-import {
-  COVALENT_API,
-  API_KEY_VALIDATION,
-  COVALENT_API_VERSION,
-} from "@/web3/constants";
-import { RequestTestTokenId } from "@/BFF";
+import { COVALENT_API, API_KEY_VALIDATION } from "@/web3/constants";
+import { RequestApiConnection } from "@/BFF";
 
 export const NeedToKnowAccordian = () => {
   const [storedApiKey, setStoredApiKey] = useState<string | null>(null);
-  const [storedApiVersion, setStoredApiVersion] = useState<string | null>(null);
-  const [selectedApiVersion, setSelectedApiVersion] = useState<string | null>(
-    null
-  );
   const [loading, setLoading] = useState<boolean>(false);
-
   const apiKeyRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -29,10 +20,6 @@ export const NeedToKnowAccordian = () => {
     localStorage.removeItem(COVALENT_API);
     apiKeyRef.current!.value = "";
     setStoredApiKey(null);
-
-    localStorage.removeItem(COVALENT_API_VERSION);
-    setStoredApiVersion(null);
-    setSelectedApiVersion(null);
   };
 
   const handleApiKey = async () => {
@@ -51,12 +38,6 @@ export const NeedToKnowAccordian = () => {
       return;
     }
 
-    if (storedApiVersion) {
-      localStorage.removeItem(COVALENT_API_VERSION);
-      setStoredApiVersion(null);
-      return;
-    }
-
     if (!key) {
       showNotification({
         title: "Error",
@@ -66,24 +47,12 @@ export const NeedToKnowAccordian = () => {
       return;
     }
 
-    if (!selectedApiVersion) {
-      showNotification({
-        title: "Error",
-        message: "Please enter an API version.",
-        color: "red",
-      });
-      return;
-    }
-
     // Run a test query to make sure the API key is valid
     setLoading(true);
 
-    const apiKeyTestResponse = await RequestTestTokenId(
-      API_KEY_VALIDATION.tokenId,
+    const apiKeyTestResponse = await RequestApiConnection(
       API_KEY_VALIDATION.chainId,
-      API_KEY_VALIDATION.contractAddress,
-      key!,
-      selectedApiVersion!
+      key!
     );
 
     setLoading(false);
@@ -98,20 +67,14 @@ export const NeedToKnowAccordian = () => {
     }
 
     localStorage.setItem(COVALENT_API, key!);
-    localStorage.setItem(COVALENT_API_VERSION, selectedApiVersion!);
 
     setStoredApiKey(key!);
-    setStoredApiVersion(selectedApiVersion!);
   };
 
   useEffect(() => {
     const apiKey = localStorage.getItem(COVALENT_API);
-    const apiVersion = localStorage.getItem(COVALENT_API_VERSION);
     if (apiKey) {
       setStoredApiKey(apiKey);
-    }
-    if (apiVersion) {
-      setStoredApiVersion(apiVersion);
     }
   }, []);
 
@@ -147,16 +110,14 @@ export const NeedToKnowAccordian = () => {
 
             {/* API Version */}
             <Select
-              placeholder="Version"
-              defaultValue={storedApiVersion!}
+              defaultValue="v1"
               data={[
                 { label: "V1", value: "v1" },
                 { label: "V2", value: "v2" },
                 { label: "V3", value: "v3" },
               ]}
-              value={selectedApiVersion}
-              onChange={setSelectedApiVersion}
-              disabled={storedApiVersion ? true : false}
+              value="v1"
+              disabled
             />
 
             <Button

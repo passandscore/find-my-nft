@@ -30,8 +30,9 @@ export enum NetworkEnviroments {
 }
 
 export enum ErrorMessages {
-  NETWORK = "An error occurred while fetching the data",
+  NETWORK = "An error occurred while fetching the data. Try providing a different API key or version from the `need to know` section.",
   CONTRACT = "No contract found. Check your address and network",
   METADATA = "No metadata found. Check your address and network",
   API_TIMEOUT = "The API is taking too long to respond",
+  NETWORK_TOKEN_ERROR = "The API is taking too long to respond. Some tokens may not be displayed. Try again.",
 }

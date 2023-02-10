@@ -20,15 +20,9 @@ export const CollectionImageHandler = ({
       src={imageUrl}
       onError={() => setImageUrl("/imgs/placeholder.png")}
       alt="NFT"
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "scale-down",
-      }}
       width={Number(handleDimensions())}
       height={Number(handleDimensions())}
       quality={10}
-      priority
       onLoadingComplete={() => allImagesLoaded(index + 1)}
     />
   );

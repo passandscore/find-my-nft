@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prefindmynft": "yarn install",
     "findmynft": "yarn run dev",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint --ext .js,.jsx .",
-    "prepare": "husky install",
-    "postinstall": "husky install"
+    "prepare": "husky install"
   },
   "husky": {
     "hooks": {

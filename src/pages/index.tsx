@@ -14,7 +14,6 @@ export default function FindMyNft() {
     ComponentStates.INPUTS
   );
   const [nftData, setNftData] = useState<any>([]);
-  const [isError, setIsError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [openNeedToKnow, setOpenNeedToKnow] = useState<boolean>(false);
 
@@ -30,10 +29,6 @@ export default function FindMyNft() {
     setNftData(fetchedData);
   };
 
-  const handleIsError = (error: boolean) => {
-    setIsError(error);
-  };
-
   const handleIsLoading = (loading: boolean) => {
     setIsLoading(loading);
   };
@@ -44,7 +39,6 @@ export default function FindMyNft() {
         width={width}
         breakpoint={breakpoint}
         changeComponent={changeComponent}
-        handleIsError={handleIsError}
         handleIsLoading={handleIsLoading}
       />
 
@@ -57,9 +51,7 @@ export default function FindMyNft() {
             isLoading={isLoading}
             setOpenNeedToKnow={setOpenNeedToKnow}
           />
-          {!isError && !isLoading && (
-            <SocialsMenu openNeedToKnow={openNeedToKnow} />
-          )}
+          {!isLoading && <SocialsMenu openNeedToKnow={openNeedToKnow} />}
         </>
       )}
 
@@ -68,11 +60,7 @@ export default function FindMyNft() {
       )}
 
       {currentComponent === ComponentStates.COLLECTION && (
-        <TokenCollection
-          nftData={nftData}
-          handleIsLoading={handleIsLoading}
-          handleIsError={handleIsError}
-        />
+        <TokenCollection nftData={nftData} handleIsLoading={handleIsLoading} />
       )}
 
       <Modal

@@ -13,7 +13,7 @@ import { useCallback, useEffect, useState } from "react";
 import { prepareRequestByTokenId } from "@/BFF";
 import { SelectedTokenCard } from "@/features/Collection/SelectedTokenCard";
 import { useWindowSize } from "usehooks-ts";
-import { handleImageUrl } from "@/web3/useHandleImageUrl";
+import { handleUrl } from "@/web3/useHandleImageUrl";
 import {
   CollectionImageHandler,
   CollectionImageOverlay,
@@ -23,11 +23,9 @@ import { COVALENT_API } from "@/web3/constants";
 export function TokenCollection({
   nftData,
   handleIsLoading,
-  handleIsError,
 }: {
   nftData: any;
   handleIsLoading: any;
-  handleIsError: any;
 }) {
   const { selectedChainId, selectedContractAddress } = nftData;
   const { items } = nftData.data;
@@ -36,10 +34,12 @@ export function TokenCollection({
 
   const [page, setPage] = useState(1);
   const [currentPageData, setCurrentPageData] = useState([]) as any;
-  const [loadingPage, setLoadingPage] = useState(true);
   const [openTokenCard, setOpenTokenCard] = useState(false);
   const [selectedCardTokenData, setSelectedCardTokenData] = useState({});
   const [showPagination, setShowPagination] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(false);
+  const [isLoadingImages, setIsLoadingImages] = useState<boolean>(false);
+  const [hasLoaded, setHasLoaded] = useState<boolean>(false);
 
   const { width } = useWindowSize();
 
@@ -52,6 +52,10 @@ export function TokenCollection({
       const startIndex = (selectedPage - 1) * itemsPerPage;
       const endIndex = startIndex + itemsPerPage;
 
+      if (!hasLoaded) {
+        handleIsLoading(true);
+      }
+
       const data = Promise.all(
         items.slice(startIndex, endIndex).map(async (item: any) => {
           const { token_id } = item;
@@ -63,7 +67,7 @@ export function TokenCollection({
             providedApiKey || ""
           );
 
-          const imageUrl = handleImageUrl(tokenData?.data?.metadata?.image!);
+          const imageUrl = handleUrl(tokenData?.data?.metadata?.image!);
 
           const pageData = {
             tokenId: token_id,
@@ -73,9 +77,9 @@ export function TokenCollection({
           return pageData || {};
         })
       );
+
       return data;
     } catch (e) {
-      handleIsError(true);
       handleIsLoading(false);
       showNotification({
         title: "Error",
@@ -88,29 +92,28 @@ export function TokenCollection({
   const handleSelectedToken = (tokenId: string) => () => {
     const providedApiKey = localStorage.getItem(COVALENT_API);
 
+    setIsLoadingProfile(true);
     prepareRequestByTokenId(
       tokenId,
       selectedChainId,
       selectedContractAddress,
       providedApiKey || ""
-    ).then((tokenData) => {
-      setSelectedCardTokenData({ ...tokenData?.data });
-      setOpenTokenCard(true);
-    });
+    )
+      .then((tokenData) => {
+        setSelectedCardTokenData({ ...tokenData?.data });
+        setOpenTokenCard(true);
+      })
+      .finally(() => {
+        setIsLoadingProfile(false);
+      });
   };
 
   const allImagesLoaded = useCallback((currentImage: number) => {
-    const totalPages = Math.ceil(collectionTotal / itemsPerPage);
-    const itemsOnFinalPage = collectionTotal % itemsPerPage;
-    const currentPage = page;
+    // load the first 2 images before displaying
+    if (currentImage === 1) {
+      handleIsLoading(false);
+      setIsLoadingImages(false);
 
-    const items =
-      currentPage === totalPages
-        ? itemsPerPage
-        : itemsOnFinalPage || itemsPerPage;
-
-    if (currentImage === items) {
-      // if not at top of screeen, scroll to top
       if (window.scrollY > 0) {
         window.scrollTo({
           top: 0,
@@ -118,11 +121,6 @@ export function TokenCollection({
           behavior: "smooth",
         });
       }
-
-      setTimeout(() => {
-        setLoadingPage(false);
-        handleIsLoading(false);
-      }, 1000);
     }
   }, []);
 
@@ -133,7 +131,7 @@ export function TokenCollection({
     const currentPage = page;
     setPage(selectedPage);
 
-    setLoadingPage(true);
+    setIsLoadingImages(true);
 
     //-------Check if page has data, if not, load previous page data-----
     tokenData(selectedPage).then((data) => {
@@ -151,7 +149,8 @@ export function TokenCollection({
         });
 
         setPage(currentPage);
-        setLoadingPage(false);
+        // setLoadingPage(false);
+        setIsLoadingImages(false);
       } else {
         // reload existing page data
         setCurrentPageData(data);
@@ -161,9 +160,9 @@ export function TokenCollection({
   };
 
   const handleGridColumns = () => {
-    if (width > 0 && width < 768) {
+    if (width > 0 && width < 800) {
       return 1;
-    } else if (width > 768 && width < 1024) {
+    } else if (width > 800 && width < 1200) {
       return 2;
     } else {
       return 4;
@@ -171,9 +170,9 @@ export function TokenCollection({
   };
 
   const handleDimensions = () => {
-    if (width > 0 && width < 768) {
+    if (width > 0 && width < 800) {
       return "475";
-    } else if (width > 768 && width < 1024) {
+    } else if (width > 800 && width < 1200) {
       return "375";
     } else {
       return "275";
@@ -183,10 +182,11 @@ export function TokenCollection({
   //-----Used for initial load of page data-----
   useEffect(() => {
     if (width > 0) return;
-    setLoadingPage(true);
     tokenData(1).then((data) => {
       setCurrentPageData(data);
+      setIsLoadingImages(false);
       setShowPagination(true);
+      setHasLoaded(true);
     });
   }, [width]);
 
@@ -196,7 +196,7 @@ export function TokenCollection({
         key={item.tokenId}
         style={{
           backgroundColor: "transparent",
-          width: "100%",
+          width: `${handleDimensions()}px`,
           height: `${handleDimensions()}px`,
           display: "flex",
           justifyContent: "center",
@@ -204,7 +204,7 @@ export function TokenCollection({
         }}
       >
         <Card.Section>
-          <Skeleton visible={loadingPage}>
+          <Skeleton visible={isLoadingImages}>
             {item.image && (
               <>
                 <CollectionImageHandler
@@ -231,10 +231,17 @@ export function TokenCollection({
       <SelectedTokenCard
         openTokenCard={openTokenCard}
         setOpenTokenCard={setOpenTokenCard}
-        selectedCardTokenData={selectedCardTokenData || {}}
+        selectedCardTokenData={selectedCardTokenData}
         width={width}
+        isLoadingProfile={isLoadingProfile}
       />
-      <Box m={20}>
+      <Box
+        m={20}
+        style={{
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         <SimpleGrid cols={handleGridColumns()} mb={50}>
           {mappedCards}
         </SimpleGrid>
